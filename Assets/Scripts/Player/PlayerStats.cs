@@ -1,4 +1,5 @@
 
+
 using UnityEngine;
 
 [CreateAssetMenu(
@@ -8,32 +9,38 @@ using UnityEngine;
 public class PlayerStats : ScriptableObject
 {
     [Header("Movimiento horizontal")]
-
     [Tooltip("Velocidad horizontal maxima.")]
     public float maxSpeed = 6f;
 
-    [Tooltip("Segundos que tarda en alcanzar la velocidad maxima.")]
-    [Min(0.01f)]
+    [Tooltip("Segundos para alcanzar la velocidad maxima. 0 = instantaneo.")]
+    [Min(0f)]
     public float accelerationTime = 1f;
 
-    [Tooltip("Segundos que tarda en frenar hasta detenerse.")]
-    [Min(0.01f)]
+    [Tooltip("Segundos para frenar. 0 = frenado instantaneo.")]
+    [Min(0f)]
     public float decelerationTime = 0.5f;
 
     [Header("Salto")]
-
-    [Tooltip("Fuerza inicial del salto.")]
     public float jumpForce = 12f;
 
-    [Tooltip("Cantidad total de saltos antes de tocar el suelo.")]
     [Min(1)]
     public int maxJumps = 1;
 
     [Header("Gravedad")]
-
     public float gravityScale = 3f;
 
     [Header("Deteccion del suelo")]
-
     public float groundCheckRadius = 0.18f;
+
+    [Header("Vida y defensa")]
+    [Min(1)]
+    public int startingHearts = 3;
+
+    [Min(0)]
+    public int startingShields = 0;
+
+    [Tooltip("Segundos de proteccion despues de recibir un golpe.")]
+    [Min(0f)]
+    public float invulnerabilityDuration = 0.75f;
 }
+
