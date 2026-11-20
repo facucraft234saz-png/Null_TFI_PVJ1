@@ -7,21 +7,41 @@ public class ExitDoor2D : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Collider2D doorCollider;
 
+    public bool IsUnlocked { get; private set; }
+
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         doorCollider = GetComponent<Collider2D>();
+
+        IsUnlocked = false;
 
         spriteRenderer.color = Color.black;
     }
 
     public void Unlock()
     {
+        if (IsUnlocked)
+            return;
+
+        IsUnlocked = true;
+
         spriteRenderer.color = Color.white;
 
         if (doorCollider != null)
             doorCollider.enabled = false;
 
         Debug.Log("¡La puerta está desbloqueada!");
+    }
+
+    public void EnterDoor()
+    {
+        if (!IsUnlocked)
+            return;
+
+        Debug.Log("¡El jugador interactuó con la Exit Door!");
+
+        // FUTURO:
+        // Aquí agregaremos la carga de la siguiente escena.
     }
 }

@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,6 +26,8 @@ public class GiftProgressManager2D : MonoBehaviour
     private readonly List<Vector3> blackGiftPositions =
         new List<Vector3>();
 
+    private ExitDoor2D spawnedDoor;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -38,7 +41,7 @@ public class GiftProgressManager2D : MonoBehaviour
 
     private void Start()
     {
-        // Buscamos todos los regalos negros activos de la escena.
+        // Buscar regalos negros de la escena.
         BlackGift2D[] blackGifts =
             FindObjectsByType<BlackGift2D>(FindObjectsSortMode.None);
 
@@ -47,6 +50,9 @@ public class GiftProgressManager2D : MonoBehaviour
         Debug.Log(
             "Regalos negros encontrados: " + BlackGiftsMaximum
         );
+
+        // La puerta aparece al comenzar el nivel.
+        SpawnDoor();
 
         if (BlackGiftsMaximum == 0)
         {
@@ -83,8 +89,11 @@ public class GiftProgressManager2D : MonoBehaviour
 
         IsUnlocked = true;
 
+        // Aparecen los regalos dorados.
         SpawnGoldenGifts();
-        SpawnDoor();
+
+        // Desbloqueamos la puerta que ya existe.
+        StartCoroutine(UnlockDoorAfterDelay());
 
         Debug.Log("¡Todos los regalos negros fueron recolectados!");
     }
@@ -136,26 +145,26 @@ public class GiftProgressManager2D : MonoBehaviour
             doorSpawnPoint.rotation
         );
 
-        ExitDoor2D doorScript = door.GetComponent<ExitDoor2D>();
+        spawnedDoor = door.GetComponent<ExitDoor2D>();
 
-        if (doorScript != null)
-        {
-            StartCoroutine(UnlockDoorAfterDelay(doorScript));
-        }
-        else
+        if (spawnedDoor == null)
         {
             Debug.LogError(
                 "El prefab de la puerta no tiene ExitDoor2D."
             );
         }
+        else
+        {
+            Debug.Log("Exit Door generada al comenzar el nivel.");
+        }
     }
 
-    private IEnumerator UnlockDoorAfterDelay(ExitDoor2D door)
+    private IEnumerator UnlockDoorAfterDelay()
     {
         yield return new WaitForSeconds(0.5f);
 
-        if (door != null)
-            door.Unlock();
+        if (spawnedDoor != null)
+            spawnedDoor.Unlock();
     }
 
     public void RegisterGoldenGiftCollected()
