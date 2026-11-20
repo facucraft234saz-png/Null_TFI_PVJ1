@@ -89,6 +89,10 @@ public class PlayerItemEffects : MonoBehaviour
         if (item == null)
             return;
 
+        // Solo las mejoras de categoria Item afectan al jugador.
+        if (item.category != InventoryCategory.Item)
+            return;
+
         int maximum = Mathf.Max(1, item.maxStack);
 
         int targetAmount = Mathf.Min(
