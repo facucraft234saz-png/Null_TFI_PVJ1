@@ -10,10 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
-  m_Name: Test_Curse
+  m_Name: Item_CameraZoom
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
-  entryName: Test_Curse
-  description: wdwewe
-  category: 2
+  entryName: 
+  description: 
+  category: 0
   icon: {fileID: 0}
-  placeholderColor: {r: 1, g: 0, b: 0.9183836, a: 1}
+  placeholderColor: {r: 0.22851615, g: 0.22659309, b: 0.7169812, a: 1}
+  upgradeType: 4
+  upgradeValue: 1
+  maxStack: 1
+  enemyDefinition: {fileID: 0}

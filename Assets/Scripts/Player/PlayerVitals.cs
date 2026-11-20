@@ -49,17 +49,27 @@ public class PlayerVitals : MonoBehaviour
         }
     }
 
-    // Recibe un golpe. Los escudos absorben primero el daño.
+    // Daño normal: utiliza la inmunidad configurada en PlayerStats.
     public void TakeDamage(int amount = 1)
+    {
+        TakeDamage(amount, stats != null
+            ? stats.invulnerabilityDuration
+            : 0f);
+    }
+
+    // Daño con tiempo de inmunidad personalizado.
+    public void TakeDamage(int amount, float immunityDuration)
     {
         if (isGameOver || IsInvulnerable || amount <= 0)
             return;
 
         int remainingDamage = amount;
 
+        // Los escudos absorben primero el daño.
         if (currentShields > 0)
         {
             int absorbed = Mathf.Min(currentShields, remainingDamage);
+
             currentShields -= absorbed;
             remainingDamage -= absorbed;
 
@@ -83,7 +93,7 @@ public class PlayerVitals : MonoBehaviour
             return;
         }
 
-        invulnerabilityTimer = stats.invulnerabilityDuration;
+        invulnerabilityTimer = Mathf.Max(0f, immunityDuration);
     }
 
     public void AddHearts(int amount)
@@ -125,6 +135,7 @@ public class PlayerVitals : MonoBehaviour
             return;
 
         isGameOver = true;
+
         Debug.Log("GAME OVER: el jugador perdió todos sus corazones.");
 
         OnGameOver?.Invoke();

@@ -10,13 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
-  m_Name: Item_CameraZoom
+  m_Name: Floryn_Entry
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
-  entryName: 
-  description: 
-  category: 0
+  entryName: Floryn
+  description: "a criatura flotante que persigue lentamente al jugador y le quita
+    un coraz\xF3n al tocarlo."
+  category: 1
   icon: {fileID: 0}
-  placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-  upgradeType: 4
-  upgradeValue: 1
-  maxStack: 1
+  placeholderColor: {r: 1, g: 0.6650944, b: 0.93138075, a: 1}
+  upgradeType: 0
+  upgradeValue: 0
+  maxStack: 5
+  enemyDefinition: {fileID: 11400000, guid: aa368384e7a8a114dbe8ac5c86433aba, type: 2}

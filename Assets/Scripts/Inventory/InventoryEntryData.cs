@@ -1,3 +1,5 @@
+
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum PlayerUpgradeType
@@ -29,19 +31,28 @@ public class InventoryEntryData : ScriptableObject
     public InventoryCategory category;
 
     [Header("Icono")]
-    [Tooltip("Si no se asigna una imagen, se mostrara un cuadrado de color.")]
     public Sprite icon;
-
-    [Tooltip("Color utilizado como icono provisional.")]
     public Color placeholderColor = Color.white;
 
     [Header("Mejora del jugador")]
     public PlayerUpgradeType upgradeType = PlayerUpgradeType.None;
-
-    [Tooltip("Valor que modifica el atributo. Su significado depende del tipo de mejora.")]
     public float upgradeValue = 1f;
 
     [Min(1)]
-    [Tooltip("Cantidad maxima de veces que este mismo item puede acumularse.")]
     public int maxStack = 1;
+
+    [Header("Configuracion de enemigo")]
+    public EnemyDefinition enemyDefinition;
+
+    [Header("Maldicion: enemigos afectados")]
+    public List<EnemyDefinition> affectedEnemies =
+        new List<EnemyDefinition>();
+
+    [Header("Maldicion: modificadores")]
+    public List<EnemyCurseModifier> enemyModifiers =
+        new List<EnemyCurseModifier>();
+
+    [Header("Maldicion: enemigos adicionales")]
+    public List<CurseAdditionalEnemy> additionalEnemies =
+        new List<CurseAdditionalEnemy>();
 }

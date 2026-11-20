@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a975e072c75ecd541b0559ad1e2cf4c2, type: 3}
+  m_Name: "Guardi\xE1n"
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDefinition
+  enemyName: "Guardi\xE1n"
+  description: Dispara
+  enemyType: 1
+  enemyPrefab: {fileID: 8803116459096055068, guid: ba6447d0d8f3e654195bba2f23dbcd97, type: 3}
+  movementSpeed: 0.8
+  damageHearts: 1
+  contactImmunityTime: 3
+  spawnDelay: 3
+  spawnDistance: 5
+  enemyScale: {x: 0.7, y: 0.7}
+  attackRange: 5
+  attackCooldown: 5
+  projectileInterval: 1
+  projectileDamage: 1
+  projectileCount: 2
+  projectileSpeed: 2
+  projectileScale: {x: 0.25, y: 0.25}
+  projectilePrefab: {fileID: 4874689927287756298, guid: b573c5a47064f4d41a8c64fde55c6ef8, type: 3}
+  projectileLifetime: 10
