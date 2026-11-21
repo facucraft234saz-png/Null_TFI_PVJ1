@@ -17,9 +17,10 @@ MonoBehaviour:
   category: 1
   icon: {fileID: 0}
   placeholderColor: {r: 0.3490566, g: 0, b: 0, a: 1}
+  upgradeEffects: []
   upgradeType: 0
   upgradeValue: 1
-  maxStack: 1
+  maxStack: 20
   enemyDefinition: {fileID: 11400000, guid: 3289b917c226ee844b991a991674fcd0, type: 2}
   affectedEnemies: []
   enemyModifiers: []

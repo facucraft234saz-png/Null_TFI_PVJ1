@@ -44,20 +44,18 @@ public class PlayerVitals : MonoBehaviour
     private void Update()
     {
         if (invulnerabilityTimer > 0f)
-        {
             invulnerabilityTimer -= Time.deltaTime;
-        }
     }
 
-    // Daño normal: utiliza la inmunidad configurada en PlayerStats.
+    // DAÑO NORMAL
     public void TakeDamage(int amount = 1)
     {
-        TakeDamage(amount, stats != null
-            ? stats.invulnerabilityDuration
-            : 0f);
+        TakeDamage(
+            amount,
+            stats != null ? stats.invulnerabilityDuration : 0f
+        );
     }
 
-    // Daño con tiempo de inmunidad personalizado.
     public void TakeDamage(int amount, float immunityDuration)
     {
         if (isGameOver || IsInvulnerable || amount <= 0)
@@ -65,11 +63,9 @@ public class PlayerVitals : MonoBehaviour
 
         int remainingDamage = amount;
 
-        // Los escudos absorben primero el daño.
         if (currentShields > 0)
         {
             int absorbed = Mathf.Min(currentShields, remainingDamage);
-
             currentShields -= absorbed;
             remainingDamage -= absorbed;
 
@@ -96,6 +92,7 @@ public class PlayerVitals : MonoBehaviour
         invulnerabilityTimer = Mathf.Max(0f, immunityDuration);
     }
 
+    // AUMENTAR VIDAS
     public void AddHearts(int amount)
     {
         if (isGameOver || amount <= 0)
@@ -105,7 +102,6 @@ public class PlayerVitals : MonoBehaviour
         currentHearts += amount;
 
         OnHeartsChanged?.Invoke(currentHearts, maxHearts);
-
         Debug.Log("Corazones aumentados: " + maxHearts);
     }
 
@@ -116,8 +112,6 @@ public class PlayerVitals : MonoBehaviour
 
         currentShields += amount;
         OnShieldsChanged?.Invoke(currentShields);
-
-        Debug.Log("Escudos actuales: " + currentShields);
     }
 
     public void Heal(int amount)
@@ -129,6 +123,12 @@ public class PlayerVitals : MonoBehaviour
         OnHeartsChanged?.Invoke(currentHearts, maxHearts);
     }
 
+    // DERROTA
+    public void ForceGameOver()
+    {
+        TriggerGameOver();
+    }
+
     private void TriggerGameOver()
     {
         if (isGameOver)
@@ -136,7 +136,7 @@ public class PlayerVitals : MonoBehaviour
 
         isGameOver = true;
 
-        Debug.Log("GAME OVER: el jugador perdió todos sus corazones.");
+        Debug.Log("GAME OVER: el jugador perdió.");
 
         OnGameOver?.Invoke();
 
@@ -146,9 +146,7 @@ public class PlayerVitals : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning(
-                "No se encontró GameManager. El evento Game Over sí fue emitido."
-            );
+            Debug.LogError("PlayerVitals: no se encontró GameManager.");
         }
     }
 }

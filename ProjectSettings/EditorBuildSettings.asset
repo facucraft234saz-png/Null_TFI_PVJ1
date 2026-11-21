@@ -11,12 +11,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: baac80215138a7a499ff1c3d88a35122
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Level.unity
     guid: 420450526a425914eaff969f3b1cd564
   - enabled: 1
     path: Assets/Scenes/Tienda.unity
     guid: e9f1bcb35659f114aabe1d6fa27a8eef
+  - enabled: 1
+    path: Assets/Scenes/TiendaEnemigos.unity
+    guid: ae665976e203db642b79daf9423c1bae
+  - enabled: 1
+    path: Assets/Scenes/TiendaMaldiciones.unity
+    guid: d82cbfdff1f44df498bf1f638f0e07ec
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

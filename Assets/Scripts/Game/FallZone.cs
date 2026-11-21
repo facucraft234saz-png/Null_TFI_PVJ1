@@ -1,56 +1,46 @@
+
 using UnityEngine;
 
 public class FallZone : MonoBehaviour
 {
     [Header("Configuracion de Caida")]
-    [Tooltip("Altura en Y por debajo de la cual el jugador pierde automaticamente.")]
+    [Tooltip("El jugador pierde al bajar de esta altura.")]
     [SerializeField] private float fallYThreshold = -15f;
 
     private Transform playerTransform;
-    private bool hasTriggered = false;
+    private PlayerVitals playerVitals;
 
     private void Start()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+
+        if (player == null)
         {
-            playerTransform = player.transform;
+            Debug.LogError("FallZone: no se encontró un objeto con tag Player.");
+            return;
+        }
+
+        playerTransform = player.transform;
+        playerVitals = player.GetComponent<PlayerVitals>();
+
+        if (playerVitals == null)
+        {
+            Debug.LogError("FallZone: el jugador no tiene PlayerVitals.");
         }
     }
 
     private void Update()
     {
-        if (hasTriggered || playerTransform == null)
+        if (playerTransform == null || playerVitals == null)
             return;
 
-        if (playerTransform.position.y < fallYThreshold)
-        {
-            TriggerGameOver();
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (hasTriggered)
+        if (playerVitals.IsGameOver)
             return;
 
-        if (other.CompareTag("Player"))
+        if (playerTransform.position.y <= fallYThreshold)
         {
-            TriggerGameOver();
-        }
-    }
-
-    private void TriggerGameOver()
-    {
-        hasTriggered = true;
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.ChangeState(GameState.GameOver);
-        }
-        else
-        {
-            Debug.LogWarning("FallZone: No se encontro GameManager en la escena.");
+            Debug.Log("El jugador cayó fuera del nivel.");
+            playerVitals.ForceGameOver();
         }
     }
 }

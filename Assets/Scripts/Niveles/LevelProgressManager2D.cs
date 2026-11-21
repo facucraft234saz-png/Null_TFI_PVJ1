@@ -1,3 +1,4 @@
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,13 +11,27 @@ public class LevelProgressManager2D : MonoBehaviour
     [SerializeField] private ProceduralLevelGenerator2D levelGenerator;
     [SerializeField] private GiftProgressManager2D giftManager;
 
-    [Header("Configuración de escenas")]
+    [Header("Configuracion de escenas")]
     [SerializeField] private string gameplaySceneName = "SampleScene";
+
+    [Tooltip("Tienda normal de objetos.")]
     [SerializeField] private string shopSceneName = "Tienda";
 
-    [Header("Progreso")]
+    [Tooltip("Tienda donde se seleccionan enemigos.")]
+    [SerializeField] private string enemyShopSceneName = "TiendaEnemigos";
+
+    [Tooltip("Tienda donde se seleccionan maldiciones.")]
+    [SerializeField] private string curseShopSceneName = "SceneMaldiciones";
+
+    [Header("Tienda normal")]
+    [Tooltip("La tienda normal aparece cada cierta cantidad de niveles pares.")]
     [Min(1)]
     [SerializeField] private int levelsBetweenShopVisits = 2;
+
+    [Header("Tienda de maldiciones")]
+    [Tooltip("La tienda de maldiciones aparece cada 5 niveles.")]
+    [Min(1)]
+    [SerializeField] private int levelsBetweenCurseShopVisits = 5;
 
     private bool isTransitioning;
 
@@ -53,7 +68,6 @@ public class LevelProgressManager2D : MonoBehaviour
 
     private IEnumerator InitializeLevel()
     {
-        // Esperamos a que los objetos de la escena estén listos.
         yield return null;
 
         if (!ValidateReferences())
@@ -82,7 +96,7 @@ public class LevelProgressManager2D : MonoBehaviour
         if (giftManager == null)
         {
             Debug.LogError(
-                "LevelProgressManager2D: no se encontró GiftProgressManager2D.",
+                "LevelProgressManager2D: no se encontro GiftProgressManager2D.",
                 this
             );
 
@@ -92,7 +106,7 @@ public class LevelProgressManager2D : MonoBehaviour
         if (PlayerScenePersistence2D.Instance == null)
         {
             Debug.LogError(
-                "No se encontró PlayerScenePersistence2D en el jugador."
+                "No se encontro PlayerScenePersistence2D."
             );
 
             return false;
@@ -113,10 +127,8 @@ public class LevelProgressManager2D : MonoBehaviour
         Debug.Log("COMIENZA EL NIVEL " + level);
         Debug.Log("================================");
 
-        // Primero eliminamos los elementos del nivel anterior.
         giftManager.PrepareForNewLevel();
 
-        // Generamos las nuevas plataformas.
         bool generated = levelGenerator.GenerateLevel(level);
 
         if (!generated)
@@ -125,10 +137,8 @@ public class LevelProgressManager2D : MonoBehaviour
             return;
         }
 
-        // Colocamos al jugador en la plataforma inicial.
         ResetPlayerPosition();
 
-        // Inicializamos los regalos y la puerta del nuevo nivel.
         giftManager.InitializeForNewLevel(
             levelGenerator.ExitDoorPosition,
             levelGenerator.ExitDoorRotation
@@ -147,7 +157,7 @@ public class LevelProgressManager2D : MonoBehaviour
         if (player == null)
         {
             Debug.LogError(
-                "LevelProgressManager2D: no se encontró PlayerController2D."
+                "LevelProgressManager2D: no se encontro PlayerController2D."
             );
 
             return;
@@ -174,6 +184,42 @@ public class LevelProgressManager2D : MonoBehaviour
     }
 
     // ------------------------------------------------
+    // TIENDA DE ENEMIGOS
+    // ------------------------------------------------
+
+    private bool ShouldVisitEnemyShop(int completedLevel)
+    {
+        int remainder = completedLevel % 10;
+
+        return remainder == 1 ||
+               remainder == 3 ||
+               remainder == 7 ||
+               remainder == 9;
+    }
+
+    // ------------------------------------------------
+    // TIENDA NORMAL
+    // ------------------------------------------------
+
+    private bool ShouldVisitNormalShop(int completedLevel)
+    {
+        int interval = Mathf.Max(1, levelsBetweenShopVisits);
+
+        return completedLevel % interval == 0;
+    }
+
+    // ------------------------------------------------
+    // TIENDA DE MALDICIONES
+    // ------------------------------------------------
+
+    private bool ShouldVisitCurseShop(int completedLevel)
+    {
+        int interval = Mathf.Max(1, levelsBetweenCurseShopVisits);
+
+        return completedLevel % interval == 0;
+    }
+
+    // ------------------------------------------------
     // COMPLETAR NIVEL
     // ------------------------------------------------
 
@@ -185,7 +231,7 @@ public class LevelProgressManager2D : MonoBehaviour
         if (PlayerScenePersistence2D.Instance == null)
         {
             Debug.LogError(
-                "No se encontró PlayerScenePersistence2D."
+                "No se encontro PlayerScenePersistence2D."
             );
 
             return;
@@ -197,27 +243,52 @@ public class LevelProgressManager2D : MonoBehaviour
 
         Debug.Log("Nivel completado: " + completedLevel);
 
-        // Guardamos el siguiente nivel en el jugador persistente.
+        // Guardamos el siguiente nivel.
         PlayerScenePersistence2D.Instance.AdvanceToNextLevel();
 
-        int shopInterval = Mathf.Max(1, levelsBetweenShopVisits);
-
-        bool shouldVisitShop =
-            completedLevel % shopInterval == 0;
-
-        if (shouldVisitShop)
+        // PRIORIDAD 1: TIENDA DE MALDICIONES.
+        if (ShouldVisitCurseShop(completedLevel))
         {
             Debug.Log(
-                "Se completaron " + completedLevel +
-                " niveles. Entrando a la tienda."
+                "Nivel " + completedLevel +
+                ": entrando a la TIENDA DE MALDICIONES."
+            );
+
+            SceneManager.LoadScene(curseShopSceneName);
+            return;
+        }
+
+        // PRIORIDAD 2: TIENDA DE ENEMIGOS.
+        if (ShouldVisitEnemyShop(completedLevel))
+        {
+            Debug.Log(
+                "Nivel " + completedLevel +
+                ": entrando a la TIENDA DE ENEMIGOS."
+            );
+
+            SceneManager.LoadScene(enemyShopSceneName);
+            return;
+        }
+
+        // PRIORIDAD 3: TIENDA NORMAL.
+        if (ShouldVisitNormalShop(completedLevel))
+        {
+            Debug.Log(
+                "Nivel " + completedLevel +
+                ": entrando a la TIENDA NORMAL."
             );
 
             SceneManager.LoadScene(shopSceneName);
+            return;
         }
-        else
-        {
-            StartCoroutine(GenerateNextLevel());
-        }
+
+        // Si no corresponde ninguna tienda, continuamos.
+        Debug.Log(
+            "Nivel " + completedLevel +
+            ": no corresponde tienda. Generando siguiente nivel."
+        );
+
+        StartCoroutine(GenerateNextLevel());
     }
 
     // ------------------------------------------------
@@ -226,7 +297,6 @@ public class LevelProgressManager2D : MonoBehaviour
 
     private IEnumerator GenerateNextLevel()
     {
-        // Esperamos un frame para finalizar la interacción con la puerta.
         yield return null;
 
         if (!ValidateReferences())
@@ -234,7 +304,6 @@ public class LevelProgressManager2D : MonoBehaviour
 
         GenerateCurrentLevel();
 
-        // Permitimos interactuar con la nueva puerta.
         isTransitioning = false;
     }
 

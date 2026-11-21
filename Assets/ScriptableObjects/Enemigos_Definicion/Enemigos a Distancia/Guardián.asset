@@ -19,15 +19,15 @@ MonoBehaviour:
   movementSpeed: 0.8
   damageHearts: 1
   contactImmunityTime: 3
-  spawnDelay: 3
-  spawnDistance: 5
+  spawnDelay: 5
+  spawnDistance: 10
   enemyScale: {x: 0.7, y: 0.7}
   attackRange: 5
-  attackCooldown: 5
+  attackCooldown: 7
   projectileInterval: 1
   projectileDamage: 1
-  projectileCount: 2
-  projectileSpeed: 2
+  projectileCount: 1
+  projectileSpeed: 1.5
   projectileScale: {x: 0.25, y: 0.25}
   projectilePrefab: {fileID: 4874689927287756298, guid: b573c5a47064f4d41a8c64fde55c6ef8, type: 3}
   projectileLifetime: 10
