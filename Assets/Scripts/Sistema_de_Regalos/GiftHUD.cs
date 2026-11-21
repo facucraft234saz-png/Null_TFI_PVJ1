@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 using System.Globalization;
 
 public class GiftHUD : MonoBehaviour
@@ -16,30 +17,51 @@ public class GiftHUD : MonoBehaviour
     [SerializeField] private TMP_Text blackGiftText;
     [SerializeField] private TMP_Text goldenGiftText;
 
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        BindReferences();
+    }
+
     private void Start()
     {
-        if (playerGold == null)
-        {
-            Debug.LogError("GiftHUD: falta PlayerGold.");
-            return;
-        }
+        BindReferences();
 
-        if (giftManager == null)
-            giftManager = GiftProgressManager2D.Instance;
+        if (playerGold != null)
+            UpdateGold(playerGold.CurrentGold);
 
-        playerGold.OnGoldChanged += UpdateGold;
-
-        UpdateGold(playerGold.CurrentGold);
         UpdateGiftCounters();
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        BindReferences();
+
+        if (playerGold != null)
+            UpdateGold(playerGold.CurrentGold);
+
+        UpdateGiftCounters();
+    }
+
+    private void BindReferences()
+    {
+        if (playerGold != null)
+            playerGold.OnGoldChanged -= UpdateGold;
+
+        playerGold = FindFirstObjectByType<PlayerGold>();
+        giftManager = GiftProgressManager2D.Instance;
+
+        if (playerGold != null)
+        {
+            playerGold.OnGoldChanged += UpdateGold;
+            UpdateGold(playerGold.CurrentGold);
+        }
     }
 
     private void Update()
     {
         if (giftManager == null)
             giftManager = GiftProgressManager2D.Instance;
-
-        if (giftManager == null)
-            return;
 
         UpdateGiftCounters();
     }
@@ -59,7 +81,8 @@ public class GiftHUD : MonoBehaviour
             CultureInfo.InvariantCulture
         );
 
-        goldText.text = "ORO: " + goldValue + " (x" + multiplier + ")";
+        goldText.text =
+            "ORO: " + goldValue + " (x" + multiplier + ")";
     }
 
     private void UpdateGiftCounters()
@@ -69,7 +92,6 @@ public class GiftHUD : MonoBehaviour
 
         bool goldenUnlocked = giftManager.IsUnlocked;
 
-        // Solo se muestra un contador a la vez.
         if (blackGiftText != null)
             blackGiftText.gameObject.SetActive(!goldenUnlocked);
 
@@ -98,8 +120,10 @@ public class GiftHUD : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+
         if (playerGold != null)
             playerGold.OnGoldChanged -= UpdateGold;
     }

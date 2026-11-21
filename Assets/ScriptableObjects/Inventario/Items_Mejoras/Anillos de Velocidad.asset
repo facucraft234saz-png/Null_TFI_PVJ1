@@ -12,11 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
   m_Name: Anillos de Velocidad
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
-  entryName: Speed_Rings
-  description: 
+  entryName: Anillos de velocidad
+  description: "\xA1Siente el impulso! Estos anillos giratorios aligeran tus pasos
+    y aumentan tu velocidad de movimiento en un +10%, ideal para esquivar peligros
+    y moverte con mayor agilidad."
   category: 0
   icon: {fileID: 0}
   placeholderColor: {r: 0.4481132, g: 0.79621184, b: 1, a: 1}
+  upgradeEffects:
+  - upgradeType: 3
+    upgradeValue: 0.1
   upgradeType: 3
-  upgradeValue: 1
-  maxStack: 2
+  upgradeValue: 0.1
+  maxStack: 4
+  enemyDefinition: {fileID: 0}
+  affectedEnemies: []
+  enemyModifiers: []
+  additionalEnemies: []

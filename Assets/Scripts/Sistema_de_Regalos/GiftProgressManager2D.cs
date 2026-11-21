@@ -26,6 +26,9 @@ public class GiftProgressManager2D : MonoBehaviour
     private readonly List<Vector3> blackGiftPositions =
         new List<Vector3>();
 
+    private readonly HashSet<BlackGift2D> collectedGifts =
+        new HashSet<BlackGift2D>();
+
     private ExitDoor2D spawnedDoor;
 
     private void Awake()
@@ -37,27 +40,57 @@ public class GiftProgressManager2D : MonoBehaviour
         }
 
         Instance = this;
+
+        ResetProgress();
     }
 
     private void Start()
     {
-        // Buscar regalos negros de la escena.
+        StartCoroutine(InitializeAfterGeneration());
+    }
+
+    private void ResetProgress()
+    {
+        BlackGiftsCollected = 0;
+        BlackGiftsMaximum = 0;
+
+        GoldenGiftsCollected = 0;
+        GoldenGiftsMaximum = 0;
+
+        IsUnlocked = false;
+
+        blackGiftPositions.Clear();
+        collectedGifts.Clear();
+
+        spawnedDoor = null;
+    }
+
+    private IEnumerator InitializeAfterGeneration()
+    {
+        // Esperamos a que Start() de los generadores termine.
+        yield return null;
+
+        // Esperamos al final del frame para contar los objetos creados.
+        yield return new WaitForEndOfFrame();
+
         BlackGift2D[] blackGifts =
-            FindObjectsByType<BlackGift2D>(FindObjectsSortMode.None);
+            FindObjectsByType<BlackGift2D>(
+                FindObjectsSortMode.None
+            );
 
         BlackGiftsMaximum = blackGifts.Length;
 
         Debug.Log(
-            "Regalos negros encontrados: " + BlackGiftsMaximum
+            "Nuevo nivel inicializado. Regalos negros: " +
+            BlackGiftsMaximum
         );
 
-        // La puerta aparece al comenzar el nivel.
         SpawnDoor();
 
         if (BlackGiftsMaximum == 0)
         {
             Debug.LogWarning(
-                "No se encontraron regalos negros en la escena."
+                "No se encontraron regalos negros. Revisá los generadores."
             );
         }
     }
@@ -67,16 +100,20 @@ public class GiftProgressManager2D : MonoBehaviour
         if (IsUnlocked || gift == null)
             return;
 
-        blackGiftPositions.Add(gift.transform.position);
+        if (!collectedGifts.Add(gift))
+            return;
 
+        blackGiftPositions.Add(gift.transform.position);
         BlackGiftsCollected++;
 
         Debug.Log(
             "Regalos negros: " +
-            BlackGiftsCollected + "/" + BlackGiftsMaximum
+            BlackGiftsCollected + "/" +
+            BlackGiftsMaximum
         );
 
-        if (BlackGiftsCollected >= BlackGiftsMaximum)
+        if (BlackGiftsCollected >= BlackGiftsMaximum &&
+            BlackGiftsMaximum > 0)
         {
             UnlockRewards();
         }
@@ -89,10 +126,8 @@ public class GiftProgressManager2D : MonoBehaviour
 
         IsUnlocked = true;
 
-        // Aparecen los regalos dorados.
         SpawnGoldenGifts();
 
-        // Desbloqueamos la puerta que ya existe.
         StartCoroutine(UnlockDoorAfterDelay());
 
         Debug.Log("¡Todos los regalos negros fueron recolectados!");
@@ -102,9 +137,7 @@ public class GiftProgressManager2D : MonoBehaviour
     {
         if (goldenGiftPrefab == null)
         {
-            Debug.LogError(
-                "Falta asignar Golden Gift Prefab."
-            );
+            Debug.LogError("Falta asignar Golden Gift Prefab.");
             return;
         }
 
@@ -155,7 +188,7 @@ public class GiftProgressManager2D : MonoBehaviour
         }
         else
         {
-            Debug.Log("Exit Door generada al comenzar el nivel.");
+            Debug.Log("Puerta generada para este nivel.");
         }
     }
 
@@ -172,11 +205,21 @@ public class GiftProgressManager2D : MonoBehaviour
         if (!IsUnlocked)
             return;
 
+        if (GoldenGiftsCollected >= GoldenGiftsMaximum)
+            return;
+
         GoldenGiftsCollected++;
 
         Debug.Log(
             "Regalos dorados: " +
-            GoldenGiftsCollected + "/" + GoldenGiftsMaximum
+            GoldenGiftsCollected + "/" +
+            GoldenGiftsMaximum
         );
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 }

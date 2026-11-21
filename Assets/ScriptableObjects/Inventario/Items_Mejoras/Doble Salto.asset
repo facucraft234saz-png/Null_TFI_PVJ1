@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
+  m_Name: Doble Salto
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
+  entryName: "Pluma Et\xE9rea"
+  description: "Esta ligera pluma desaf\xEDa la gravedad y te otorga +1 salto extra
+    en el aire para corregir trayectorias, salvar ca\xEDdas complicadas y llegar
+    m\xE1s lejos."
+  category: 0
+  icon: {fileID: 0}
+  placeholderColor: {r: 0.7830189, g: 0.25485048, b: 0.25485048, a: 1}
+  upgradeEffects:
+  - upgradeType: 8
+    upgradeValue: 1
+  upgradeType: 0
+  upgradeValue: 1
+  maxStack: 2
+  enemyDefinition: {fileID: 0}
+  affectedEnemies: []
+  enemyModifiers: []
+  additionalEnemies: []
