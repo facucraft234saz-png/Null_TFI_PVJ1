@@ -1,6 +1,5 @@
-using UnityEngine.SceneManagement;
-using UnityEngine;
 
+using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class ExitDoor2D : MonoBehaviour
@@ -40,8 +39,17 @@ public class ExitDoor2D : MonoBehaviour
         if (!IsUnlocked)
             return;
 
-        Debug.Log("Entrando a la tienda...");
+        if (LevelProgressManager2D.Instance == null)
+        {
+            Debug.LogError(
+                "No se encontró LevelProgressManager2D."
+            );
 
-        SceneManager.LoadScene("Tienda");
+            return;
+        }
+
+        Debug.Log("Saliendo del nivel...");
+
+        LevelProgressManager2D.Instance.CompleteCurrentLevel();
     }
 }

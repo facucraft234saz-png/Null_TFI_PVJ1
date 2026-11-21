@@ -5,10 +5,16 @@ public class PlayerScenePersistence2D : MonoBehaviour
 {
     private static PlayerScenePersistence2D instance;
 
+    [Header("Progreso de la partida")]
+    [SerializeField, Min(1)]
+    private int currentLevel = 1;
+
     // Cantidad total de veces que se entró a la tienda.
     private int shopVisits = 0;
 
     public static PlayerScenePersistence2D Instance => instance;
+
+    public int CurrentLevel => currentLevel;
 
     private void Awake()
     {
@@ -20,7 +26,31 @@ public class PlayerScenePersistence2D : MonoBehaviour
 
         instance = this;
         DontDestroyOnLoad(gameObject);
+
+        currentLevel = Mathf.Max(1, currentLevel);
     }
+
+    // ------------------------------------------------
+    // NIVELES
+    // ------------------------------------------------
+
+    public int GetCurrentLevel()
+    {
+        return currentLevel;
+    }
+
+    public int AdvanceToNextLevel()
+    {
+        currentLevel++;
+
+        Debug.Log("Comenzando nivel: " + currentLevel);
+
+        return currentLevel;
+    }
+
+    // ------------------------------------------------
+    // TIENDA
+    // ------------------------------------------------
 
     public int RegisterShopVisitAndGetRerolls()
     {
