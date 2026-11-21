@@ -10,7 +10,9 @@ public class EnemySpawner2D : MonoBehaviour
     [SerializeField] private PlayerVitals playerVitals;
 
     [Header("Escenas")]
-    [SerializeField] private string shopSceneName = "Tienda";
+    [SerializeField] private string gameplaySceneName = "SampleScene";
+    [SerializeField] private string normalShopSceneName = "Tienda";
+    [SerializeField] private string enemyShopSceneName = "TiendaEnemigos";
 
     private bool initialized;
     private int lastInitializedSceneHandle = -1;
@@ -18,20 +20,25 @@ public class EnemySpawner2D : MonoBehaviour
     private void Awake()
     {
         FindPlayerReferences();
+        SubscribeToInventory();
     }
 
     private void OnEnable()
     {
         SceneManager.sceneLoaded += HandleSceneLoaded;
 
-        if (playerInventory != null)
-            playerInventory.OnEntryAdded += HandleEntryAdded;
+        FindPlayerReferences();
+        SubscribeToInventory();
     }
 
     private void Start()
     {
         InitializeForScene(SceneManager.GetActiveScene());
     }
+
+    // --------------------------------------------------
+    // REFERENCIAS E INVENTARIO
+    // --------------------------------------------------
 
     private void FindPlayerReferences()
     {
@@ -48,6 +55,19 @@ public class EnemySpawner2D : MonoBehaviour
             playerVitals = FindFirstObjectByType<PlayerVitals>();
     }
 
+    private void SubscribeToInventory()
+    {
+        if (playerInventory == null)
+            return;
+
+        playerInventory.OnEntryAdded -= HandleEntryAdded;
+        playerInventory.OnEntryAdded += HandleEntryAdded;
+    }
+
+    // --------------------------------------------------
+    // CAMBIO DE ESCENAS
+    // --------------------------------------------------
+
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         InitializeForScene(scene);
@@ -55,21 +75,34 @@ public class EnemySpawner2D : MonoBehaviour
 
     private void InitializeForScene(Scene scene)
     {
-        // No invocamos enemigos dentro de la tienda.
-        if (scene.name == shopSceneName)
+        // Solamente invocamos enemigos en la escena de juego.
+        if (scene.name != gameplaySceneName)
         {
             initialized = false;
+
+            // Evita invocaciones pendientes dentro de las tiendas.
+            StopAllCoroutines();
+
+            Debug.Log(
+                "EnemySpawner2D: invocaciones desactivadas en " +
+                scene.name
+            );
+
             return;
         }
 
-        // Evitamos inicializar dos veces la misma carga.
+        // Evitamos inicializar dos veces la misma escena.
         if (scene.handle == lastInitializedSceneHandle)
             return;
 
         lastInitializedSceneHandle = scene.handle;
         initialized = false;
 
+        // Cancelamos cualquier invocación anterior.
+        StopAllCoroutines();
+
         FindPlayerReferences();
+        SubscribeToInventory();
 
         if (playerInventory == null || playerVitals == null)
         {
@@ -77,11 +110,15 @@ public class EnemySpawner2D : MonoBehaviour
                 "EnemySpawner2D: no se encontraron PlayerInventory o PlayerVitals.",
                 this
             );
+
             return;
         }
 
-        Debug.Log("Reinicializando enemigos del inventario para: " + scene.name);
+        Debug.Log(
+            "Inicializando enemigos del inventario en " + scene.name
+        );
 
+        // Recuperamos los enemigos y maldiciones del inventario.
         foreach (InventoryStack stack in playerInventory.Entries)
         {
             if (stack == null || stack.data == null)
@@ -118,10 +155,15 @@ public class EnemySpawner2D : MonoBehaviour
         initialized = true;
     }
 
+    // --------------------------------------------------
+    // NUEVOS ELEMENTOS DEL INVENTARIO
+    // --------------------------------------------------
+
     private void HandleEntryAdded(
         InventoryEntryData entry,
         int currentAmount)
     {
+        // No invocamos enemigos fuera de la partida.
         if (!initialized || entry == null)
             return;
 
@@ -142,6 +184,10 @@ public class EnemySpawner2D : MonoBehaviour
             ProcessCurseAdditionalEnemies(entry, 1);
         }
     }
+
+    // --------------------------------------------------
+    // ENEMIGOS ADICIONALES DE MALDICIONES
+    // --------------------------------------------------
 
     private void ProcessCurseAdditionalEnemies(
         InventoryEntryData curse,
@@ -166,6 +212,7 @@ public class EnemySpawner2D : MonoBehaviour
                     "El tipo seleccionado no coincide con EnemyDefinition: " +
                     definition.enemyName
                 );
+
                 continue;
             }
 
@@ -180,6 +227,10 @@ public class EnemySpawner2D : MonoBehaviour
             }
         }
     }
+
+    // --------------------------------------------------
+    // ESPERA E INVOCACION
+    // --------------------------------------------------
 
     private IEnumerator SpawnEnemyAfterDelay(
         EnemyDefinition definition)
@@ -197,8 +248,14 @@ public class EnemySpawner2D : MonoBehaviour
             yield return new WaitForSeconds(stats.spawnDelay);
         }
 
-        if (playerVitals == null || playerVitals.IsGameOver)
+        // Comprobaciones posteriores a la espera.
+        if (!initialized ||
+            SceneManager.GetActiveScene().name != gameplaySceneName ||
+            playerVitals == null ||
+            playerVitals.IsGameOver)
+        {
             yield break;
+        }
 
         SpawnEnemy(definition, stats);
     }
@@ -212,6 +269,7 @@ public class EnemySpawner2D : MonoBehaviour
             Debug.LogWarning(
                 "EnemySpawner2D: falta asignar el prefab."
             );
+
             return;
         }
 
@@ -281,6 +339,10 @@ public class EnemySpawner2D : MonoBehaviour
 
         Debug.Log("Enemigo invocado: " + definition.enemyName);
     }
+
+    // --------------------------------------------------
+    // LIMPIEZA
+    // --------------------------------------------------
 
     private void OnDisable()
     {

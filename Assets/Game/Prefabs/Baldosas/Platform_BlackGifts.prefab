@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 9043437742653030436}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.13782, y: 10.97, z: 0}
-  m_LocalScale: {x: 18.20653, y: 1.375, z: 1}
+  m_LocalPosition: {x: 350.87497, y: 184.17828, z: 0}
+  m_LocalScale: {x: 12.516989, y: 1.375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.16981131, g: 0.068084724, b: 0.15857407, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -152,6 +152,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlatformGiftGenerator2D
   blackGiftPrefab: {fileID: 2855817336759648269, guid: b7c2d34641b64c449aefe6e723f1e051, type: 3}
-  giftCount: 11
+  giftCount: 5
   sideMargin: 0.5
   verticalOffset: 1.3

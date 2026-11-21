@@ -7,84 +7,68 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("Configuracion")]
-    [SerializeField] private string gameplaySceneName = "Level01";
+    [Header("Escenas")]
+    [SerializeField] private string gameplaySceneName = "SampleScene";
+    [SerializeField] private string mainMenuSceneName = "MainMenu";
 
     public GameState CurrentState { get; private set; }
 
-    public DifficultyData SelectedDifficulty { get; private set; }
-
-    // Evento para que otros sistemas puedan escuchar
-    // los cambios de estado sin depender directamente
-    // de este GameManager.
     public event Action<GameState> OnGameStateChanged;
+
+    private bool isLoadingGame;
 
     private void Awake()
     {
-        // Evita tener dos GameManagers simultaneos.
         if (Instance != null && Instance != this)
         {
+            Debug.LogWarning("GameManager duplicado. Se elimina: " + gameObject.name);
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
 
-        // Conserva el GameManager al cambiar de escena.
         DontDestroyOnLoad(gameObject);
 
-        ChangeState(GameState.Start);
+        CurrentState = GameState.Start;
+        Time.timeScale = 1f;
+
+        Debug.Log("GameManager creado correctamente y marcado como persistente.");
     }
 
-    // ------------------------------------------------
-    // DIFICULTAD
-    // ------------------------------------------------
-
-    public void SetDifficulty(DifficultyData difficulty)
+    private void OnEnable()
     {
-        if (difficulty == null)
-        {
-            Debug.LogError("No se puede seleccionar una dificultad nula.");
-            return;
-        }
-
-        SelectedDifficulty = difficulty;
-
-        Debug.Log(
-            "Dificultad seleccionada: " +
-            difficulty.difficultyName
-        );
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    // ------------------------------------------------
-    // INICIAR PARTIDA
-    // ------------------------------------------------
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Debug.Log("Escena cargada: " + scene.name +
+                  " | GameManager existe: " + (Instance != null));
+    }
 
     public void StartGame()
     {
-        if (SelectedDifficulty == null)
-        {
-            Debug.LogWarning(
-                "Primero debes seleccionar una dificultad."
-            );
-
+        if (isLoadingGame)
             return;
-        }
 
-        // Preparamos el estado antes de cargar el nivel.
+        isLoadingGame = true;
+
+        Time.timeScale = 1f;
+
+        PlayerScenePersistence2D.PrepareNewRun();
+
         ChangeState(GameState.Playing);
 
-        Debug.Log(
-            "Iniciando partida en dificultad: " +
-            SelectedDifficulty.difficultyName
-        );
+        Debug.Log("Iniciando partida: " + gameplaySceneName);
 
         SceneManager.LoadScene(gameplaySceneName);
     }
-
-    // ------------------------------------------------
-    // CAMBIO DE ESTADO
-    // ------------------------------------------------
 
     public void ChangeState(GameState newState)
     {
@@ -93,19 +77,42 @@ public class GameManager : MonoBehaviour
 
         CurrentState = newState;
 
+        if (newState == GameState.GameOver ||
+            newState == GameState.Paused ||
+            newState == GameState.Victory)
+        {
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+        }
+
         Debug.Log("Estado del juego: " + CurrentState);
 
         OnGameStateChanged?.Invoke(CurrentState);
     }
 
-    // ------------------------------------------------
-    // LIMPIEZA
-    // ------------------------------------------------
+    public void ReturnToMainMenu()
+    {
+        Time.timeScale = 1f;
+
+        PlayerScenePersistence2D.EndRun();
+
+        isLoadingGame = false;
+
+        ChangeState(GameState.Start);
+
+        SceneManager.LoadScene(mainMenuSceneName);
+    }
 
     private void OnDestroy()
     {
         if (Instance == this)
         {
+            Debug.LogWarning("GameManager persistente destruido.");
+
+            Time.timeScale = 1f;
             Instance = null;
         }
     }
