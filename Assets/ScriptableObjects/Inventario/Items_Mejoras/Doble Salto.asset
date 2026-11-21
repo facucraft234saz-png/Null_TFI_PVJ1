@@ -17,7 +17,7 @@ MonoBehaviour:
     en el aire para corregir trayectorias, salvar ca\xEDdas complicadas y llegar
     m\xE1s lejos."
   category: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ce128ea32309690479ea2d4ffe75a0ce, type: 3}
   placeholderColor: {r: 0.7830189, g: 0.25485048, b: 0.25485048, a: 1}
   upgradeEffects:
   - upgradeType: 8

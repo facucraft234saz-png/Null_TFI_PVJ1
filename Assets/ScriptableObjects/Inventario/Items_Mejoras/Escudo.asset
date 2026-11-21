@@ -16,7 +16,7 @@ MonoBehaviour:
   description: "Tu primera l\xEDnea de defensa! Absorbe el impacto y te permite recibir
     1 golpe extra de los enemigos antes de que tu vitalidad se vea comprometida."
   category: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 729cfe49a20e1b545b7f402b978fea12, type: 3}
   placeholderColor: {r: 0.24458313, g: 0, b: 1, a: 1}
   upgradeEffects:
   - upgradeType: 2

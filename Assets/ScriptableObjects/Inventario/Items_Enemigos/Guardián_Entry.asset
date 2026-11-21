@@ -12,15 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
   m_Name: "Guardi\xE1n_Entry"
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
-  entryName: "Guardi\xE1n"
-  description: Dispara
+  entryName: "El Guardi\xE1n"
+  description: "Un cr\xE1neo antiguo suspendido en el vac\xEDo, custodio silencioso
+    de los tramos m\xE1s hostiles. Sus cuencas arden con una luz espectral que se
+    intensifica justo antes de liberar descargas de energ\xEDa en l\xEDnea recta
+    o en patr\xF3n. No persigue a su presa: espera, calcula el espacio y obliga al
+    jugador a leer el ritmo del aire para avanzar sin ser derribado."
   category: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 1302270eba5dbe24489a0ca1bff74f17, type: 3}
   placeholderColor: {r: 0.3490566, g: 0, b: 0, a: 1}
   upgradeEffects: []
   upgradeType: 0
   upgradeValue: 1
-  maxStack: 20
+  maxStack: 10
   enemyDefinition: {fileID: 11400000, guid: 3289b917c226ee844b991a991674fcd0, type: 2}
   affectedEnemies: []
   enemyModifiers: []

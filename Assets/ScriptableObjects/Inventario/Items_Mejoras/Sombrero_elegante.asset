@@ -17,7 +17,7 @@ MonoBehaviour:
     la buena suerte y aumenta tu multiplicador de oro en +x0.2 al recoger regalos
     dorados, ideal para llenar tus bolsillos antes de visitar la tienda."
   category: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: dcbc5aa2f84ca9b41a18d66a9e49ce38, type: 3}
   placeholderColor: {r: 0.8396226, g: 0.75540936, b: 0.13861692, a: 1}
   upgradeEffects:
   - upgradeType: 11

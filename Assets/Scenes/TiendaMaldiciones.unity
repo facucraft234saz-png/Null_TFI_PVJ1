@@ -548,7 +548,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 185, y: -120}
+  m_AnchoredPosition: {x: 185, y: -126.5}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &561760954
@@ -822,8 +822,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 94, y: -20}
-  m_SizeDelta: {x: 400, y: 80}
+  m_AnchoredPosition: {x: 117, y: -19}
+  m_SizeDelta: {x: 450, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &746564183
 CanvasRenderer:
@@ -880,8 +880,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -961,8 +961,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 44, y: -80}
-  m_SizeDelta: {x: 200, y: 30}
+  m_AnchoredPosition: {x: 53.2, y: -87.4}
+  m_SizeDelta: {x: 300, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &765728177
 MonoBehaviour:
@@ -1215,6 +1215,8 @@ MonoBehaviour:
   availableCurses:
   - {fileID: 11400000, guid: 796be4fc2205d19448d50f11d3922be5, type: 2}
   - {fileID: 11400000, guid: d9fb79feea317024ea6c46a8f6188eb4, type: 2}
+  - {fileID: 11400000, guid: ec39bc9a444c52041aeed9585e0ba256, type: 2}
+  - {fileID: 11400000, guid: 547aac8ae54b06d4f83b6dbb9be42010, type: 2}
   returnSceneName: SampleScene
   playerInventory: {fileID: 0}
   curseNameText: {fileID: 5439812}

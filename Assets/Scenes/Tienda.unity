@@ -1783,23 +1783,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopManager2D
   availableOffers:
   - item: {fileID: 11400000, guid: 6a88e5513d06b6944ba8a5ee485bd1f0, type: 2}
-    price: 8
+    price: 7
   - item: {fileID: 11400000, guid: b85bcaccbfcc81d449f89af379ab2ca6, type: 2}
-    price: 70
+    price: 35
   - item: {fileID: 11400000, guid: 65cd84d2e4659264b819ea75349a631e, type: 2}
-    price: 45
+    price: 35
   - item: {fileID: 11400000, guid: e888ef42aec18e542bd22b036e573e57, type: 2}
+    price: 50
+  - item: {fileID: 11400000, guid: 1fc8041b92a6f8644bbcf6f9feae6e94, type: 2}
     price: 100
-  - item: {fileID: 11400000, guid: f80eb414a0515ba4e9f08775e01fa457, type: 2}
-    price: 10
   - item: {fileID: 11400000, guid: 7f9f7cefe408cda49beb3bc604121c37, type: 2}
     price: 10
   - item: {fileID: 11400000, guid: c708f2aca8b22e149b752aa2fb2ece4f, type: 2}
     price: 30
   - item: {fileID: 11400000, guid: ad053443f608d6347bc64d393c45e4d3, type: 2}
     price: 20
-  - item: {fileID: 11400000, guid: 1fc8041b92a6f8644bbcf6f9feae6e94, type: 2}
-    price: 100
+  - item: {fileID: 11400000, guid: ab57f8ce0486f79499b9cd3fc042a374, type: 2}
+    price: 10
   returnSceneName: SampleScene
   playerGold: {fileID: 0}
   playerInventory: {fileID: 0}

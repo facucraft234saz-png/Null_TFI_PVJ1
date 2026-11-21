@@ -18,7 +18,7 @@ MonoBehaviour:
     y frenes en seco en cuanto sueltes el control, ideal para giros cerrados y saltos
     milim\xE9tricos."
   category: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c1e40dfc9f671fd4fb242b4ca2ec8f37, type: 3}
   placeholderColor: {r: 1, g: 0, b: 0.968781, a: 1}
   upgradeEffects:
   - upgradeType: 4

@@ -12,19 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
   m_Name: Floryn Gigante
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
-  entryName: Test_Curse
-  description: wdwewe
+  entryName: "Hinchaz\xF3n Floral"
+  description: "Una maldici\xF3n que hace que el cuerpo de Floryn crezca un 50% en
+    tama\xF1o mientras conserva su expresi\xF3n dulce y su paso calmo. Al ocupar
+    m\xE1s espacio y pesar m\xE1s en escena, vuelve m\xE1s exigente esquivarla o
+    calcular los saltos a su alrededor, convirtiendo un obst\xE1culo ya de por s\xED
+    delicado en una presencia mucho m\xE1s imponente."
   category: 2
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c13eecca04234b84bbac4bc6bfd28323, type: 3}
   placeholderColor: {r: 1, g: 0, b: 0.9183836, a: 1}
+  upgradeEffects: []
   upgradeType: 0
   upgradeValue: 1
-  maxStack: 1
+  maxStack: 2
   enemyDefinition: {fileID: 0}
   affectedEnemies:
   - {fileID: 11400000, guid: aa368384e7a8a114dbe8ac5c86433aba, type: 2}
   enemyModifiers:
   - stat: 5
     mode: 0
-    value: 200
+    value: 50
   additionalEnemies: []
