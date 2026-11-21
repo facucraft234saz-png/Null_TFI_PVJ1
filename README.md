@@ -1,4 +1,4 @@
-# NULLSCAPE 2D
+# VOIDSCAPE 2D
 ### Trabajo Final Integrador — Programación de Videojuegos I
 
 <p align="center">
