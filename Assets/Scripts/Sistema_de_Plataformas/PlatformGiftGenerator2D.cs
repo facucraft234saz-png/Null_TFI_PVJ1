@@ -4,24 +4,21 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class PlatformGiftGenerator2D : MonoBehaviour
 {
-    [Header("Prefab")]
+    [Header("PREFAB DEL REGALO")]
     [SerializeField] private GameObject blackGiftPrefab;
 
-    [Header("Distribucion")]
+    [Header("CANTIDAD DE REGALOS")]
     [Min(1)]
     [SerializeField] private int giftCount = 5;
 
+    [Header("DISTRIBUCIÓN")]
     [Min(0f)]
     [SerializeField] private float sideMargin = 0.5f;
 
     [Min(0f)]
     [SerializeField] private float verticalOffset = 0.5f;
 
-    [Header("Generacion")]
-    [SerializeField] private bool generateOnStart = true;
-
     private BoxCollider2D platformCollider;
-    private Transform generatedGiftsParent;
 
     private void Awake()
     {
@@ -29,19 +26,20 @@ public class PlatformGiftGenerator2D : MonoBehaviour
         platformCollider.isTrigger = false;
     }
 
-    private void Start()
-    {
-        if (generateOnStart)
-            GenerateGifts();
-    }
+    // ------------------------------------------------
+    // GENERAR REGALOS
+    // ------------------------------------------------
 
     [ContextMenu("Generar regalos")]
     public void GenerateGifts()
     {
+        if (platformCollider == null)
+            platformCollider = GetComponent<BoxCollider2D>();
+
         if (blackGiftPrefab == null)
         {
             Debug.LogError(
-                "Falta asignar el prefab del regalo negro.",
+                name + ": falta asignar el prefab del regalo negro.",
                 this
             );
             return;
@@ -57,13 +55,15 @@ public class PlatformGiftGenerator2D : MonoBehaviour
         if (availableWidth < 0f)
         {
             Debug.LogWarning(
-                "Los margenes son demasiado grandes para esta plataforma.",
+                name + ": los márgenes son demasiado grandes.",
                 this
             );
             return;
         }
 
-        generatedGiftsParent = new GameObject("GeneratedGifts").transform;
+        Transform generatedGiftsParent =
+            new GameObject("GeneratedGifts").transform;
+
         generatedGiftsParent.SetParent(transform);
         generatedGiftsParent.localPosition = Vector3.zero;
 
@@ -100,11 +100,15 @@ public class PlatformGiftGenerator2D : MonoBehaviour
         }
 
         Debug.Log(
-            gameObject.name + ": generados " +
-            giftCount + " regalos negros.",
+            name + ": generados " + giftCount +
+            " regalos negros.",
             this
         );
     }
+
+    // ------------------------------------------------
+    // ELIMINAR REGALOS ANTERIORES
+    // ------------------------------------------------
 
     [ContextMenu("Eliminar regalos generados")]
     public void ClearGeneratedGifts()
@@ -118,7 +122,5 @@ public class PlatformGiftGenerator2D : MonoBehaviour
             Destroy(existing.gameObject);
         else
             DestroyImmediate(existing.gameObject);
-
-        generatedGiftsParent = null;
     }
 }
