@@ -16,7 +16,6 @@ public class BlackGift2D : MonoBehaviour
         if (collected)
             return;
 
-        // Verificamos que quien lo recoja sea el jugador.
         PlayerVitals player =
             other.GetComponentInParent<PlayerVitals>();
 
@@ -25,13 +24,22 @@ public class BlackGift2D : MonoBehaviour
 
         if (GiftProgressManager2D.Instance == null)
         {
-            Debug.LogError("No existe GiftProgressManager2D.");
+            Debug.LogError(
+                "No existe GiftProgressManager2D."
+            );
+
             return;
         }
 
         collected = true;
 
-        GiftProgressManager2D.Instance.RegisterBlackGiftCollected(this);
+        GiftProgressManager2D.Instance
+            .RegisterBlackGiftCollected(this);
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBlackGiftSound();
+        }
 
         Destroy(gameObject);
     }

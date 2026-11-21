@@ -7,6 +7,8 @@ public class ExitDoor2D : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Collider2D doorCollider;
 
+    private bool levelCompleted;
+
     public bool IsUnlocked { get; private set; }
 
     private void Awake()
@@ -15,6 +17,7 @@ public class ExitDoor2D : MonoBehaviour
         doorCollider = GetComponent<Collider2D>();
 
         IsUnlocked = false;
+        levelCompleted = false;
 
         spriteRenderer.color = Color.black;
     }
@@ -36,7 +39,7 @@ public class ExitDoor2D : MonoBehaviour
 
     public void EnterDoor()
     {
-        if (!IsUnlocked)
+        if (!IsUnlocked || levelCompleted)
             return;
 
         if (LevelProgressManager2D.Instance == null)
@@ -46,6 +49,14 @@ public class ExitDoor2D : MonoBehaviour
             );
 
             return;
+        }
+
+        levelCompleted = true;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayExitDoorSound();
+            AudioManager.Instance.StopExitPromptLoop();
         }
 
         Debug.Log("Saliendo del nivel...");

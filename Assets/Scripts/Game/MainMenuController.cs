@@ -6,15 +6,12 @@ public class MainMenuController : MonoBehaviour
     [Header("PANELES")]
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject clasePanel;
+    [SerializeField] private GameObject ajustesPanel;
 
     private void Start()
     {
         ShowMainMenu();
     }
-
-    // --------------------------------------------
-    // MOSTRAR MENU PRINCIPAL
-    // --------------------------------------------
 
     public void ShowMainMenu()
     {
@@ -23,11 +20,10 @@ public class MainMenuController : MonoBehaviour
 
         if (clasePanel != null)
             clasePanel.SetActive(false);
-    }
 
-    // --------------------------------------------
-    // ABRIR PANEL DE CLASE
-    // --------------------------------------------
+        if (ajustesPanel != null)
+            ajustesPanel.SetActive(false);
+    }
 
     public void OpenClasePanel()
     {
@@ -36,20 +32,27 @@ public class MainMenuController : MonoBehaviour
 
         if (clasePanel != null)
             clasePanel.SetActive(true);
+
+        if (ajustesPanel != null)
+            ajustesPanel.SetActive(false);
     }
 
-    // --------------------------------------------
-    // VOLVER AL MENU PRINCIPAL
-    // --------------------------------------------
+    public void OpenAjustesPanel()
+    {
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(false);
+
+        if (clasePanel != null)
+            clasePanel.SetActive(false);
+
+        if (ajustesPanel != null)
+            ajustesPanel.SetActive(true);
+    }
 
     public void BackToMainMenu()
     {
         ShowMainMenu();
     }
-
-    // --------------------------------------------
-    // CREAR PARTIDA
-    // --------------------------------------------
 
     public void CreateGame()
     {
