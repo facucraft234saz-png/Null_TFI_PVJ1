@@ -66,7 +66,7 @@ public class ExitDoorPrompt2D : MonoBehaviour
 
         if (exitDoor.IsUnlocked)
         {
-            promptText.text = "PRESIONA E PARA ENTRAR";
+            promptText.text = "PRESIONA E PARA CONTINUAR";
         }
         else
         {
