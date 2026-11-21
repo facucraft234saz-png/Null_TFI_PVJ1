@@ -10,14 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
-  m_Name: Item_CameraZoom
+  m_Name: Camara Lejana
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
-  entryName: 
-  description: 
+  entryName: Camara lejana
+  description: "\xA1Ampl\xEDa tu campo de visi\xF3n! Aleja la c\xE1mara un 5% para
+    darte una perspectiva m\xE1s abierta del entorno, anticipar amenazas y planificar
+    cada salto con mayor claridad."
   category: 0
   icon: {fileID: 0}
-  placeholderColor: {r: 0.22851615, g: 0.22659309, b: 0.7169812, a: 1}
+  placeholderColor: {r: 0.008009953, g: 0.008009953, b: 0.5660378, a: 1}
+  upgradeEffects:
+  - upgradeType: 9
+    upgradeValue: 5
   upgradeType: 4
   upgradeValue: 1
-  maxStack: 1
+  maxStack: 20
   enemyDefinition: {fileID: 0}
+  affectedEnemies: []
+  enemyModifiers: []
+  additionalEnemies: []

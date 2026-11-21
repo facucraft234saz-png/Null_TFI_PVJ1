@@ -1,6 +1,7 @@
 
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class EnemySpawner2D : MonoBehaviour
 {
@@ -8,34 +9,78 @@ public class EnemySpawner2D : MonoBehaviour
     [SerializeField] private PlayerInventory playerInventory;
     [SerializeField] private PlayerVitals playerVitals;
 
+    [Header("Escenas")]
+    [SerializeField] private string shopSceneName = "Tienda";
+
     private bool initialized;
+    private int lastInitializedSceneHandle = -1;
 
     private void Awake()
     {
-        if (playerInventory == null)
-            playerInventory = GetComponent<PlayerInventory>();
-
-        if (playerVitals == null)
-            playerVitals = GetComponent<PlayerVitals>();
+        FindPlayerReferences();
     }
 
     private void OnEnable()
     {
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+
         if (playerInventory != null)
             playerInventory.OnEntryAdded += HandleEntryAdded;
     }
 
     private void Start()
     {
+        InitializeForScene(SceneManager.GetActiveScene());
+    }
+
+    private void FindPlayerReferences()
+    {
+        if (playerInventory == null)
+            playerInventory = GetComponent<PlayerInventory>();
+
+        if (playerVitals == null)
+            playerVitals = GetComponent<PlayerVitals>();
+
+        if (playerInventory == null)
+            playerInventory = FindFirstObjectByType<PlayerInventory>();
+
+        if (playerVitals == null)
+            playerVitals = FindFirstObjectByType<PlayerVitals>();
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        InitializeForScene(scene);
+    }
+
+    private void InitializeForScene(Scene scene)
+    {
+        // No invocamos enemigos dentro de la tienda.
+        if (scene.name == shopSceneName)
+        {
+            initialized = false;
+            return;
+        }
+
+        // Evitamos inicializar dos veces la misma carga.
+        if (scene.handle == lastInitializedSceneHandle)
+            return;
+
+        lastInitializedSceneHandle = scene.handle;
+        initialized = false;
+
+        FindPlayerReferences();
+
         if (playerInventory == null || playerVitals == null)
         {
             Debug.LogError(
-                "EnemySpawner2D: faltan referencias al inventario o PlayerVitals.",
+                "EnemySpawner2D: no se encontraron PlayerInventory o PlayerVitals.",
                 this
             );
-
             return;
         }
+
+        Debug.Log("Reinicializando enemigos del inventario para: " + scene.name);
 
         foreach (InventoryStack stack in playerInventory.Entries)
         {
@@ -110,8 +155,7 @@ public class EnemySpawner2D : MonoBehaviour
             if (additional == null)
                 continue;
 
-            EnemyDefinition definition =
-                additional.enemyDefinition;
+            EnemyDefinition definition = additional.enemyDefinition;
 
             if (definition == null)
                 continue;
@@ -122,7 +166,6 @@ public class EnemySpawner2D : MonoBehaviour
                     "El tipo seleccionado no coincide con EnemyDefinition: " +
                     definition.enemyName
                 );
-
                 continue;
             }
 
@@ -151,9 +194,7 @@ public class EnemySpawner2D : MonoBehaviour
 
         if (stats.spawnDelay > 0f)
         {
-            yield return new WaitForSeconds(
-                stats.spawnDelay
-            );
+            yield return new WaitForSeconds(stats.spawnDelay);
         }
 
         if (playerVitals == null || playerVitals.IsGameOver)
@@ -171,7 +212,6 @@ public class EnemySpawner2D : MonoBehaviour
             Debug.LogWarning(
                 "EnemySpawner2D: falta asignar el prefab."
             );
-
             return;
         }
 
@@ -239,18 +279,13 @@ public class EnemySpawner2D : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            "Enemigo invocado: " + definition.enemyName +
-            "\nTipo: " + definition.enemyType +
-            "\nVelocidad: " + stats.movementSpeed +
-            "\nRango: " + stats.attackRange +
-            "\nProyectiles: " + stats.projectileCount +
-            "\nVelocidad proyectil: " + stats.projectileSpeed
-        );
+        Debug.Log("Enemigo invocado: " + definition.enemyName);
     }
 
     private void OnDisable()
     {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+
         if (playerInventory != null)
             playerInventory.OnEntryAdded -= HandleEntryAdded;
 

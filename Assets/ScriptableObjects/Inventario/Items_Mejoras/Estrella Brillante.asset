@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
+  m_Name: Estrella Brillante
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
+  entryName: Estrella Brillante
+  description: "\xA1Precisi\xF3n absoluta al instante! Elimina por completo la aceleraci\xF3n
+    y la desaceleraci\xF3n para que alcances tu velocidad m\xE1xima de inmediato
+    y frenes en seco en cuanto sueltes el control, ideal para giros cerrados y saltos
+    milim\xE9tricos."
+  category: 0
+  icon: {fileID: 0}
+  placeholderColor: {r: 1, g: 0, b: 0.968781, a: 1}
+  upgradeEffects:
+  - upgradeType: 4
+    upgradeValue: 1
+  - upgradeType: 5
+    upgradeValue: 1
+  upgradeType: 0
+  upgradeValue: 1
+  maxStack: 1
+  enemyDefinition: {fileID: 0}
+  affectedEnemies: []
+  enemyModifiers: []
+  additionalEnemies: []

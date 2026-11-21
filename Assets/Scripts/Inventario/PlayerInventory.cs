@@ -22,7 +22,6 @@ public class PlayerInventory : MonoBehaviour
 
     public event Action OnInventoryChanged;
 
-    // Avisa qué ítem se agregó y cuál es su cantidad actual.
     public event Action<InventoryEntryData, int> OnEntryAdded;
 
     public IReadOnlyList<InventoryStack> Entries => entries;
@@ -37,20 +36,49 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    // Este método también será utilizado por la futura tienda.
     public void AddEntry(InventoryEntryData entry)
     {
+        TryAddEntry(entry);
+    }
+
+    public bool TryAddEntry(InventoryEntryData entry)
+    {
         if (entry == null)
-            return;
+            return false;
+
+        InventoryStack existing =
+            entries.Find(x => x.data == entry);
+
+        int currentAmount = existing != null
+            ? existing.amount
+            : 0;
+
+        int maximum = Mathf.Max(1, entry.maxStack);
+
+        if (currentAmount >= maximum)
+        {
+            Debug.Log(
+                "No se puede agregar " + entry.entryName +
+                ": alcanzó su maxStack."
+            );
+
+            return false;
+        }
 
         AddEntryInternal(entry);
 
-        InventoryStack stack = entries.Find(x => x.data == entry);
+        InventoryStack stack =
+            entries.Find(x => x.data == entry);
 
-        Debug.Log("Elemento agregado: " + entry.entryName);
+        Debug.Log(
+            "Elemento agregado: " + entry.entryName +
+            " (" + stack.amount + "/" + maximum + ")"
+        );
 
         OnEntryAdded?.Invoke(entry, stack.amount);
         OnInventoryChanged?.Invoke();
+
+        return true;
     }
 
     private void AddEntryInternal(InventoryEntryData entry)
@@ -58,11 +86,15 @@ public class PlayerInventory : MonoBehaviour
         if (entry == null)
             return;
 
-        InventoryStack existing = entries.Find(x => x.data == entry);
+        InventoryStack existing =
+            entries.Find(x => x.data == entry);
+
+        int maximum = Mathf.Max(1, entry.maxStack);
 
         if (existing != null)
         {
-            existing.amount++;
+            if (existing.amount < maximum)
+                existing.amount++;
         }
         else
         {
@@ -74,9 +106,29 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
+    public int GetAmount(InventoryEntryData entry)
+    {
+        if (entry == null)
+            return 0;
+
+        InventoryStack stack =
+            entries.Find(x => x.data == entry);
+
+        return stack != null ? stack.amount : 0;
+    }
+
+    public bool CanAddEntry(InventoryEntryData entry)
+    {
+        if (entry == null)
+            return false;
+
+        return GetAmount(entry) < Mathf.Max(1, entry.maxStack);
+    }
+
     public void RemoveEntry(InventoryEntryData entry)
     {
-        InventoryStack existing = entries.Find(x => x.data == entry);
+        InventoryStack existing =
+            entries.Find(x => x.data == entry);
 
         if (existing == null)
             return;

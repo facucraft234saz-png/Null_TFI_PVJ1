@@ -1,6 +1,7 @@
 
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InventoryUI : MonoBehaviour
 {
@@ -20,9 +21,7 @@ public class InventoryUI : MonoBehaviour
 
     [Header("Animacion")]
     [SerializeField] private float animationDuration = 0.25f;
-    [SerializeField]
-    private Vector2 closedOffset =
-        new Vector2(0, -80);
+    [SerializeField] private Vector2 closedOffset = new Vector2(0, -80);
 
     private Vector2 openPosition;
     private Vector2 closedPosition;
@@ -32,39 +31,81 @@ public class InventoryUI : MonoBehaviour
 
     private void Awake()
     {
-        openPosition = panelTransform.anchoredPosition;
-        closedPosition = openPosition + closedOffset;
+        if (panelTransform != null)
+        {
+            openPosition = panelTransform.anchoredPosition;
+            closedPosition = openPosition + closedOffset;
+        }
     }
 
     private void OnEnable()
     {
-        if (playerInventory != null)
-            playerInventory.OnInventoryChanged += RefreshInventory;
-    }
-
-    private void OnDisable()
-    {
-        if (playerInventory != null)
-            playerInventory.OnInventoryChanged -= RefreshInventory;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        BindInventory();
     }
 
     private void Start()
     {
         isOpen = false;
 
-        inventoryPanel.SetActive(false);
-        canvasGroup.alpha = 0f;
-        panelTransform.anchoredPosition = closedPosition;
+        if (inventoryPanel != null)
+            inventoryPanel.SetActive(false);
+
+        if (canvasGroup != null)
+            canvasGroup.alpha = 0f;
+
+        if (panelTransform != null)
+            panelTransform.anchoredPosition = closedPosition;
 
         RefreshInventory();
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        BindInventory();
+        RefreshInventory();
+
+        // Al volver de otra escena, el inventario comienza cerrado.
+        isOpen = false;
+
+        if (animationCoroutine != null)
+            StopCoroutine(animationCoroutine);
+
+        if (inventoryPanel != null)
+            inventoryPanel.SetActive(false);
+
+        if (canvasGroup != null)
+            canvasGroup.alpha = 0f;
+
+        if (panelTransform != null)
+            panelTransform.anchoredPosition = closedPosition;
+    }
+
+    private void BindInventory()
+    {
+        if (playerInventory != null)
+            playerInventory.OnInventoryChanged -= RefreshInventory;
+
+        playerInventory = FindFirstObjectByType<PlayerInventory>();
+
+        if (playerInventory != null)
+            playerInventory.OnInventoryChanged += RefreshInventory;
+        else
+            Debug.LogWarning("InventoryUI: no se encontró PlayerInventory.");
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+
+        if (playerInventory != null)
+            playerInventory.OnInventoryChanged -= RefreshInventory;
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.M))
-        {
             ToggleInventory();
-        }
     }
 
     public void ToggleInventory()
@@ -76,36 +117,35 @@ public class InventoryUI : MonoBehaviour
 
         if (isOpen)
         {
+            BindInventory();
             RefreshInventory();
-            inventoryPanel.SetActive(true);
+
+            if (inventoryPanel != null)
+                inventoryPanel.SetActive(true);
         }
 
-        animationCoroutine =
-            StartCoroutine(AnimatePanel(isOpen));
+        animationCoroutine = StartCoroutine(AnimatePanel(isOpen));
     }
 
     private IEnumerator AnimatePanel(bool opening)
     {
+        if (panelTransform == null || canvasGroup == null)
+            yield break;
+
         float elapsed = 0f;
 
         Vector2 startPosition = panelTransform.anchoredPosition;
         float startAlpha = canvasGroup.alpha;
 
-        Vector2 targetPosition =
-            opening ? openPosition : closedPosition;
-
+        Vector2 targetPosition = opening ? openPosition : closedPosition;
         float targetAlpha = opening ? 1f : 0f;
 
         while (elapsed < animationDuration)
         {
             elapsed += Time.unscaledDeltaTime;
 
-            float progress = Mathf.Clamp01(
-                elapsed / animationDuration
-            );
-
-            float smoothProgress =
-                Mathf.SmoothStep(0f, 1f, progress);
+            float progress = Mathf.Clamp01(elapsed / animationDuration);
+            float smoothProgress = Mathf.SmoothStep(0f, 1f, progress);
 
             panelTransform.anchoredPosition =
                 Vector2.Lerp(startPosition, targetPosition, smoothProgress);
@@ -119,7 +159,7 @@ public class InventoryUI : MonoBehaviour
         panelTransform.anchoredPosition = targetPosition;
         canvasGroup.alpha = targetAlpha;
 
-        if (!opening)
+        if (!opening && inventoryPanel != null)
             inventoryPanel.SetActive(false);
 
         animationCoroutine = null;
@@ -139,8 +179,7 @@ public class InventoryUI : MonoBehaviour
             if (stack == null || stack.data == null)
                 continue;
 
-            Transform destination =
-                GetContainer(stack.data.category);
+            Transform destination = GetContainer(stack.data.category);
 
             if (destination == null)
                 continue;
@@ -178,8 +217,6 @@ public class InventoryUI : MonoBehaviour
             return;
 
         foreach (Transform child in container)
-        {
             Destroy(child.gameObject);
-        }
     }
 }

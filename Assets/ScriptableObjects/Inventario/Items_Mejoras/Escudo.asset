@@ -13,11 +13,18 @@ MonoBehaviour:
   m_Name: Escudo
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
   entryName: Escudo
-  description: 
+  description: "Tu primera l\xEDnea de defensa! Absorbe el impacto y te permite recibir
+    1 golpe extra de los enemigos antes de que tu vitalidad se vea comprometida."
   category: 0
   icon: {fileID: 0}
   placeholderColor: {r: 0.24458313, g: 0, b: 1, a: 1}
+  upgradeEffects:
+  - upgradeType: 2
+    upgradeValue: 1
   upgradeType: 2
   upgradeValue: 1
-  maxStack: 1
+  maxStack: 2
   enemyDefinition: {fileID: 0}
+  affectedEnemies: []
+  enemyModifiers: []
+  additionalEnemies: []

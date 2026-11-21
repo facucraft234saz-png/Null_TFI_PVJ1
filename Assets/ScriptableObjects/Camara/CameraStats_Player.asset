@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5542086751c0bbf4a8fc80efcd63feb0, type: 3}
+  m_Name: CameraStats_Player
+  m_EditorClassIdentifier: Assembly-CSharp::CameraStats
+  smoothSpeed: 5
+  verticalOffset: 1
+  initialZoom: 5
+  zoomSmoothSpeed: 2
+  minZoom: 3
+  maxZoom: 12

@@ -1,5 +1,6 @@
-
+using UnityEngine.SceneManagement;
 using UnityEngine;
+
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class ExitDoor2D : MonoBehaviour
@@ -39,9 +40,8 @@ public class ExitDoor2D : MonoBehaviour
         if (!IsUnlocked)
             return;
 
-        Debug.Log("¡El jugador interactuó con la Exit Door!");
+        Debug.Log("Entrando a la tienda...");
 
-        // FUTURO:
-        // Aquí agregaremos la carga de la siguiente escena.
+        SceneManager.LoadScene("Tienda");
     }
 }

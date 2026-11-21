@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerVitalsHUD : MonoBehaviour
 {
@@ -31,25 +32,47 @@ public class PlayerVitalsHUD : MonoBehaviour
 
     private void OnEnable()
     {
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        BindVitals();
+    }
+
+    private void Start()
+    {
+        BindVitals();
+        RefreshAllIcons();
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        BindVitals();
+        RefreshAllIcons();
+    }
+
+    private void BindVitals()
+    {
+        if (playerVitals != null)
+        {
+            playerVitals.OnHeartsChanged -= UpdateHearts;
+            playerVitals.OnShieldsChanged -= UpdateShields;
+        }
+
+        playerVitals = FindFirstObjectByType<PlayerVitals>();
+
         if (playerVitals == null)
+        {
+            Debug.LogWarning("PlayerVitalsHUD: no se encontró PlayerVitals.");
             return;
+        }
 
         playerVitals.OnHeartsChanged += UpdateHearts;
         playerVitals.OnShieldsChanged += UpdateShields;
     }
 
-    private void Start()
+    private void RefreshAllIcons()
     {
-        if (playerVitals == null || iconPrefab == null)
-        {
-            Debug.LogError(
-                "PlayerVitalsHUD: faltan referencias.",
-                this
-            );
+        if (playerVitals == null)
             return;
-        }
 
-        // Mostramos los valores iniciales.
         UpdateHearts(
             playerVitals.CurrentHearts,
             playerVitals.MaxHearts
@@ -60,11 +83,13 @@ public class PlayerVitalsHUD : MonoBehaviour
 
     private void OnDisable()
     {
-        if (playerVitals == null)
-            return;
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
 
-        playerVitals.OnHeartsChanged -= UpdateHearts;
-        playerVitals.OnShieldsChanged -= UpdateShields;
+        if (playerVitals != null)
+        {
+            playerVitals.OnHeartsChanged -= UpdateHearts;
+            playerVitals.OnShieldsChanged -= UpdateShields;
+        }
     }
 
     private void CreatePlaceholderSprite()
@@ -108,35 +133,24 @@ public class PlayerVitalsHUD : MonoBehaviour
         if (container == null || iconPrefab == null)
             return;
 
-        // Eliminamos los iconos anteriores.
         foreach (Transform child in container)
-        {
             Destroy(child.gameObject);
-        }
 
-        // Creamos uno por cada corazón o escudo.
         for (int i = 0; i < amount; i++)
         {
-            Image newIcon = Instantiate(
-                iconPrefab,
-                container
-            );
+            Image newIcon = Instantiate(iconPrefab, container);
 
-            newIcon.sprite =
-                customSprite != null
+            newIcon.sprite = customSprite != null
                 ? customSprite
                 : placeholderSprite;
 
-            newIcon.color =
-                customSprite != null
+            newIcon.color = customSprite != null
                 ? Color.white
                 : placeholderColor;
 
             newIcon.preserveAspect = true;
             newIcon.raycastTarget = false;
-
-            newIcon.rectTransform.sizeDelta =
-                new Vector2(22, 22);
+            newIcon.rectTransform.sizeDelta = new Vector2(22, 22);
         }
     }
 }

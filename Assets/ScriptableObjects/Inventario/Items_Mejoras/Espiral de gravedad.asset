@@ -10,13 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
-  m_Name: Espiral de gravedad
+  m_Name: Espiral de Gravedad
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
   entryName: Espiral de gravedad
-  description: wewe
+  description: "\xA1Flota con mayor ligereza! Esta espiral reduce la gravedad en
+    un 10% para hacer tus ca\xEDdas m\xE1s suaves, darte m\xE1s control en el aire
+    y facilitar saltos precisos."
   category: 0
   icon: {fileID: 0}
-  placeholderColor: {r: 0.1945087, g: 0.27114633, b: 0.4433962, a: 1}
-  upgradeType: 6
-  upgradeValue: -1
-  maxStack: 1
+  placeholderColor: {r: 0.03986517, g: 0.9056604, b: 0, a: 1}
+  upgradeEffects:
+  - upgradeType: 6
+    upgradeValue: -0.1
+  upgradeType: 0
+  upgradeValue: 1
+  maxStack: 10
+  enemyDefinition: {fileID: 0}
+  affectedEnemies: []
+  enemyModifiers: []
+  additionalEnemies: []

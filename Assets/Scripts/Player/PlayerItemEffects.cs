@@ -2,10 +2,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(PlayerController2D))]
 [RequireComponent(typeof(PlayerVitals))]
 [RequireComponent(typeof(PlayerInventory))]
+[RequireComponent(typeof(PlayerGold))]
 public class PlayerItemEffects : MonoBehaviour
 {
     [Header("Configuracion base")]
@@ -14,8 +16,10 @@ public class PlayerItemEffects : MonoBehaviour
     private PlayerController2D controller;
     private PlayerVitals vitals;
     private PlayerInventory inventory;
+    private PlayerGold playerGold;
+    private CameraFollow2D cameraFollow;
 
-    // Cantidad de mejoras que ya fueron aplicadas.
+    // Cantidad de stacks cuyas mejoras ya fueron procesadas.
     private Dictionary<InventoryEntryData, int> itemStacks =
         new Dictionary<InventoryEntryData, int>();
 
@@ -26,6 +30,7 @@ public class PlayerItemEffects : MonoBehaviour
         controller = GetComponent<PlayerController2D>();
         vitals = GetComponent<PlayerVitals>();
         inventory = GetComponent<PlayerInventory>();
+        playerGold = GetComponent<PlayerGold>();
 
         if (baseStats == null)
         {
@@ -42,6 +47,8 @@ public class PlayerItemEffects : MonoBehaviour
     {
         if (inventory != null)
             inventory.OnEntryAdded += HandleEntryAdded;
+
+        SceneManager.sceneLoaded += HandleSceneLoaded;
     }
 
     private void Start()
@@ -49,17 +56,18 @@ public class PlayerItemEffects : MonoBehaviour
         if (!enabled || inventory == null)
             return;
 
-        // Aplicamos los elementos que ya estaban configurados
-        // en Starting Entries antes de comenzar la partida.
+        FindCamera();
+
+        // Procesamos todos los artículos que ya tiene el jugador.
         foreach (InventoryStack stack in inventory.Entries)
         {
-            if (stack.data == null)
+            if (stack == null || stack.data == null)
                 continue;
 
             SynchronizeEntry(stack.data, stack.amount);
         }
 
-        RecalculateMovementStats();
+        RecalculatePlayerStats();
 
         Debug.Log("Mejoras iniciales del jugador aplicadas.");
     }
@@ -68,6 +76,26 @@ public class PlayerItemEffects : MonoBehaviour
     {
         if (inventory != null)
             inventory.OnEntryAdded -= HandleEntryAdded;
+
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+    }
+
+    // ------------------------------------------------
+    // CAMBIO DE ESCENA
+    // ------------------------------------------------
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        FindCamera();
+        RecalculateCameraStats();
+    }
+
+    private void FindCamera()
+    {
+        cameraFollow = FindFirstObjectByType<CameraFollow2D>();
+
+        if (cameraFollow != null)
+            RecalculateCameraStats();
     }
 
     // ------------------------------------------------
@@ -79,18 +107,14 @@ public class PlayerItemEffects : MonoBehaviour
         int currentAmount)
     {
         SynchronizeEntry(item, currentAmount);
-        RecalculateMovementStats();
+        RecalculatePlayerStats();
     }
 
     private void SynchronizeEntry(
         InventoryEntryData item,
         int inventoryAmount)
     {
-        if (item == null)
-            return;
-
-        // Solo las mejoras de categoria Item afectan al jugador.
-        if (item.category != InventoryCategory.Item)
+        if (item == null || item.category != InventoryCategory.Item)
             return;
 
         int maximum = Mathf.Max(1, item.maxStack);
@@ -102,64 +126,93 @@ public class PlayerItemEffects : MonoBehaviour
 
         int alreadyApplied = GetStack(item);
 
-        // No aplicamos dos veces una mejora que ya existe.
+        // Aplicamos únicamente los stacks nuevos.
         while (alreadyApplied < targetAmount)
         {
-            ApplySingleUpgrade(item);
             alreadyApplied++;
+
+            itemStacks[item] = alreadyApplied;
+
+            ApplyVitalEffects(item);
+
+            OnUpgradeApplied?.Invoke(item, alreadyApplied);
         }
     }
 
     // ------------------------------------------------
-    // APLICAR UNA MEJORA
+    // OBTENER LAS MEJORAS DEL ARTICULO
     // ------------------------------------------------
 
-    private void ApplySingleUpgrade(InventoryEntryData item)
+    private List<PlayerUpgradeEffect> GetConfiguredEffects(
+        InventoryEntryData item)
     {
+        List<PlayerUpgradeEffect> effects =
+            new List<PlayerUpgradeEffect>();
+
         if (item == null)
-            return;
+            return effects;
 
-        if (item.upgradeType == PlayerUpgradeType.None)
+        // Preferimos la nueva lista de mejoras.
+        if (item.upgradeEffects != null &&
+            item.upgradeEffects.Count > 0)
         {
-            Debug.LogWarning(
-                "El item " + item.entryName +
-                " no tiene una mejora configurada."
-            );
+            foreach (PlayerUpgradeEffect effect in item.upgradeEffects)
+            {
+                if (effect != null &&
+                    effect.upgradeType != PlayerUpgradeType.None)
+                {
+                    effects.Add(effect);
+                }
+            }
 
-            return;
+            return effects;
         }
 
-        int currentStack = GetStack(item);
-
-        if (currentStack >= Mathf.Max(1, item.maxStack))
-            return;
-
-        itemStacks[item] = currentStack + 1;
-
-        switch (item.upgradeType)
+        // Compatibilidad con artículos anteriores.
+        if (item.upgradeType != PlayerUpgradeType.None)
         {
-            case PlayerUpgradeType.AddHearts:
-                vitals.AddHearts(
-                    Mathf.Max(1, Mathf.RoundToInt(item.upgradeValue))
-                );
-                break;
-
-            case PlayerUpgradeType.AddShields:
-                vitals.AddShields(
-                    Mathf.Max(1, Mathf.RoundToInt(item.upgradeValue))
-                );
-                break;
+            effects.Add(new PlayerUpgradeEffect
+            {
+                upgradeType = item.upgradeType,
+                upgradeValue = item.upgradeValue
+            });
         }
 
-        int newStack = itemStacks[item];
-
-        Debug.Log(
-            "Mejora aplicada: " + item.entryName +
-            " (" + newStack + "/" + item.maxStack + ")"
-        );
-
-        OnUpgradeApplied?.Invoke(item, newStack);
+        return effects;
     }
+
+    // ------------------------------------------------
+    // EFECTOS DE VIDA Y ESCUDOS
+    // ------------------------------------------------
+
+    private void ApplyVitalEffects(InventoryEntryData item)
+    {
+        List<PlayerUpgradeEffect> effects =
+            GetConfiguredEffects(item);
+
+        foreach (PlayerUpgradeEffect effect in effects)
+        {
+            int amount = Mathf.RoundToInt(effect.upgradeValue);
+
+            if (amount <= 0)
+                continue;
+
+            switch (effect.upgradeType)
+            {
+                case PlayerUpgradeType.AddHearts:
+                    vitals.AddHearts(amount);
+                    break;
+
+                case PlayerUpgradeType.AddShields:
+                    vitals.AddShields(amount);
+                    break;
+            }
+        }
+    }
+
+    // ------------------------------------------------
+    // CONSULTAR STACKS
+    // ------------------------------------------------
 
     public int GetStack(InventoryEntryData item)
     {
@@ -172,10 +225,10 @@ public class PlayerItemEffects : MonoBehaviour
     }
 
     // ------------------------------------------------
-    // RECALCULAR ATRIBUTOS
+    // RECALCULAR ATRIBUTOS DEL JUGADOR
     // ------------------------------------------------
 
-    private void RecalculateMovementStats()
+    private void RecalculatePlayerStats()
     {
         float speedBonusPercent = 0f;
         float accelerationReduction = 0f;
@@ -185,8 +238,10 @@ public class PlayerItemEffects : MonoBehaviour
 
         int extraJumps = 0;
 
-        foreach (KeyValuePair<InventoryEntryData, int> pair
-            in itemStacks)
+        // Nueva mejora: multiplicador de oro.
+        float goldMultiplierBonus = 0f;
+
+        foreach (KeyValuePair<InventoryEntryData, int> pair in itemStacks)
         {
             InventoryEntryData item = pair.Key;
             int amount = pair.Value;
@@ -194,42 +249,50 @@ public class PlayerItemEffects : MonoBehaviour
             if (item == null)
                 continue;
 
-            float totalValue = item.upgradeValue * amount;
+            List<PlayerUpgradeEffect> effects =
+                GetConfiguredEffects(item);
 
-            switch (item.upgradeType)
+            foreach (PlayerUpgradeEffect effect in effects)
             {
-                case PlayerUpgradeType.MoveSpeedPercent:
-                    speedBonusPercent += totalValue;
-                    break;
+                float totalValue = effect.upgradeValue * amount;
 
-                case PlayerUpgradeType.AccelerationTimeReduction:
-                    accelerationReduction += totalValue;
-                    break;
+                switch (effect.upgradeType)
+                {
+                    case PlayerUpgradeType.MoveSpeedPercent:
+                        // 0.10 equivale a un 10%.
+                        speedBonusPercent += totalValue;
+                        break;
 
-                case PlayerUpgradeType.DecelerationTimeReduction:
-                    decelerationReduction += totalValue;
-                    break;
+                    case PlayerUpgradeType.AccelerationTimeReduction:
+                        accelerationReduction += totalValue;
+                        break;
 
-                case PlayerUpgradeType.GravityChange:
-                    gravityChange += totalValue;
-                    break;
+                    case PlayerUpgradeType.DecelerationTimeReduction:
+                        decelerationReduction += totalValue;
+                        break;
 
-                case PlayerUpgradeType.JumpForceChange:
-                    jumpForceChange += totalValue;
-                    break;
+                    case PlayerUpgradeType.GravityChange:
+                        gravityChange += totalValue;
+                        break;
 
-                case PlayerUpgradeType.ExtraJumps:
-                    extraJumps += Mathf.RoundToInt(totalValue);
-                    break;
+                    case PlayerUpgradeType.JumpForceChange:
+                        jumpForceChange += totalValue;
+                        break;
+
+                    case PlayerUpgradeType.ExtraJumps:
+                        extraJumps += Mathf.RoundToInt(totalValue);
+                        break;
+
+                    case PlayerUpgradeType.GoldMultiplierBonus:
+                        goldMultiplierBonus += totalValue;
+                        break;
+                }
             }
         }
 
-        // Velocidad: suma porcentajes acumulados.
         float finalSpeed =
             baseStats.maxSpeed * (1f + speedBonusPercent);
 
-        // Aceleración y desaceleración.
-        // Llegar a cero significa movimiento instantáneo.
         float finalAcceleration = Mathf.Max(
             0f,
             baseStats.accelerationTime - accelerationReduction
@@ -240,7 +303,6 @@ public class PlayerItemEffects : MonoBehaviour
             baseStats.decelerationTime - decelerationReduction
         );
 
-        // Gravedad y fuerza del salto.
         float finalGravity = Mathf.Max(
             0f,
             baseStats.gravityScale + gravityChange
@@ -251,7 +313,6 @@ public class PlayerItemEffects : MonoBehaviour
             baseStats.jumpForce + jumpForceChange
         );
 
-        // Cantidad total de saltos.
         int finalJumps = Mathf.Max(
             1,
             baseStats.maxJumps + extraJumps
@@ -264,6 +325,16 @@ public class PlayerItemEffects : MonoBehaviour
         controller.SetJumpForce(finalJumpForce);
         controller.SetMaxJumps(finalJumps);
 
+        // Aplicamos la bonificación acumulada de oro.
+        if (playerGold != null)
+        {
+            playerGold.SetUpgradeMultiplierBonus(
+                goldMultiplierBonus
+            );
+        }
+
+        RecalculateCameraStats();
+
         Debug.Log(
             "ATRIBUTOS ACTUALIZADOS\n" +
             "Velocidad: " + finalSpeed +
@@ -271,8 +342,64 @@ public class PlayerItemEffects : MonoBehaviour
             "\nDesaceleración: " + finalDeceleration +
             "\nGravedad: " + finalGravity +
             "\nFuerza de salto: " + finalJumpForce +
-            "\nSaltos máximos: " + finalJumps
+            "\nSaltos máximos: " + finalJumps +
+            "\nBonificación multiplicador de oro: +" +
+            goldMultiplierBonus
+        );
+    }
+
+    // ------------------------------------------------
+    // MEJORAS DE CAMARA
+    // ------------------------------------------------
+
+    private void RecalculateCameraStats()
+    {
+        if (cameraFollow == null)
+            return;
+
+        float zoomPercent = 0f;
+        float followLagReduction = 0f;
+
+        foreach (KeyValuePair<InventoryEntryData, int> pair in itemStacks)
+        {
+            InventoryEntryData item = pair.Key;
+            int amount = pair.Value;
+
+            if (item == null)
+                continue;
+
+            foreach (PlayerUpgradeEffect effect in GetConfiguredEffects(item))
+            {
+                float totalValue = effect.upgradeValue * amount;
+
+                switch (effect.upgradeType)
+                {
+                    case PlayerUpgradeType.CameraZoomPercent:
+                        zoomPercent += totalValue;
+                        break;
+
+                    case PlayerUpgradeType.CameraFollowLagReductionPercent:
+                        followLagReduction += totalValue;
+                        break;
+                }
+            }
+        }
+
+        float zoomMultiplier = Mathf.Max(
+            0.01f,
+            1f + zoomPercent / 100f
+        );
+
+        cameraFollow.SetZoomMultiplier(zoomMultiplier);
+
+        cameraFollow.SetFollowLagReduction(
+            Mathf.Clamp(followLagReduction, 0f, 100f)
+        );
+
+        Debug.Log(
+            "CAMARA ACTUALIZADA\n" +
+            "Modificador de zoom: " + zoomPercent + "%" +
+            "\nReducción de retraso: " + followLagReduction + "%"
         );
     }
 }
-

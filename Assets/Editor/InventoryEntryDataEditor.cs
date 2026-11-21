@@ -55,16 +55,43 @@ public class InventoryEntryDataEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
+    // ================================================
+    // MEJORAS DEL JUGADOR
+    // ================================================
+
     private void DrawItemConfiguration()
     {
         DrawSection(
-            "Mejora del jugador",
-            "Este elemento modifica las estadisticas del jugador."
+            "Mejoras del jugador",
+            "Este elemento puede modificar varias estadisticas del jugador. Puedes agregar tantas mejoras como necesites."
         );
 
-        DrawProperty("upgradeType");
-        DrawProperty("upgradeValue");
+        SerializedProperty effects =
+            serializedObject.FindProperty("upgradeEffects");
+
+        if (effects != null)
+        {
+            EditorGUILayout.PropertyField(
+                effects,
+                new GUIContent(
+                    "Lista de mejoras",
+                    "Agrega diferentes mejoras y configura el valor de cada una."
+                ),
+                true
+            );
+        }
+        else
+        {
+            EditorGUILayout.HelpBox(
+                "No se encontró la lista upgradeEffects. Revisá InventoryEntryData.cs.",
+                MessageType.Error
+            );
+        }
     }
+
+    // ================================================
+    // CONFIGURACION DE ENEMIGOS
+    // ================================================
 
     private void DrawEnemyConfiguration()
     {
@@ -75,6 +102,10 @@ public class InventoryEntryDataEditor : Editor
 
         DrawProperty("enemyDefinition");
     }
+
+    // ================================================
+    // CONFIGURACION DE MALDICIONES
+    // ================================================
 
     private void DrawCurseConfiguration()
     {
@@ -103,6 +134,10 @@ public class InventoryEntryDataEditor : Editor
 
         DrawProperty("additionalEnemies");
     }
+
+    // ================================================
+    // ELEMENTOS VISUALES DEL INSPECTOR
+    // ================================================
 
     private void DrawSection(
         string title,

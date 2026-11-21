@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class GoldenGift2D : MonoBehaviour
 {
-    [Header("Recompensa base")]
+    [Header("Recompensa")]
     [Min(1)]
     [SerializeField] private int goldAmount = 1;
 
