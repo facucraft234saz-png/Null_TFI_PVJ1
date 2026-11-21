@@ -227,6 +227,18 @@ public class GiftProgressManager2D : MonoBehaviour
             "Regalos dorados disponibles: " +
             GoldenGiftsMaximum
         );
+
+        Debug.Log(
+    "Regalos dorados disponibles: " +
+    GoldenGiftsMaximum
+);
+
+        // Sonido cuando aparecen los regalos dorados.
+        if (GoldenGiftsMaximum > 0 &&
+            AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayGoldenGiftsAppearSound();
+        }
     }
 
     // ------------------------------------------------

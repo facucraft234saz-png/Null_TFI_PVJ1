@@ -28,7 +28,10 @@ public class PlayerVitals : MonoBehaviour
     {
         if (stats == null)
         {
-            Debug.LogError("PlayerVitals: falta asignar PlayerStats.", this);
+            Debug.LogError(
+                "PlayerVitals: falta asignar PlayerStats.", this
+            );
+
             enabled = false;
             return;
         }
@@ -47,7 +50,10 @@ public class PlayerVitals : MonoBehaviour
             invulnerabilityTimer -= Time.deltaTime;
     }
 
+    // ------------------------------------------------
     // DAÑO NORMAL
+    // ------------------------------------------------
+
     public void TakeDamage(int amount = 1)
     {
         TakeDamage(
@@ -61,11 +67,15 @@ public class PlayerVitals : MonoBehaviour
         if (isGameOver || IsInvulnerable || amount <= 0)
             return;
 
+        int previousHearts = currentHearts;
         int remainingDamage = amount;
 
         if (currentShields > 0)
         {
-            int absorbed = Mathf.Min(currentShields, remainingDamage);
+            int absorbed = Mathf.Min(
+                currentShields, remainingDamage
+            );
+
             currentShields -= absorbed;
             remainingDamage -= absorbed;
 
@@ -74,8 +84,22 @@ public class PlayerVitals : MonoBehaviour
 
         if (remainingDamage > 0)
         {
-            currentHearts = Mathf.Max(0, currentHearts - remainingDamage);
-            OnHeartsChanged?.Invoke(currentHearts, maxHearts);
+            currentHearts = Mathf.Max(
+                0, currentHearts - remainingDamage
+            );
+
+            OnHeartsChanged?.Invoke(
+                currentHearts, maxHearts
+            );
+        }
+
+        // Sonido solamente si se perdió algún corazón.
+        if (currentHearts < previousHearts)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayPlayerDamageSound();
+            }
         }
 
         Debug.Log(
@@ -89,10 +113,15 @@ public class PlayerVitals : MonoBehaviour
             return;
         }
 
-        invulnerabilityTimer = Mathf.Max(0f, immunityDuration);
+        invulnerabilityTimer = Mathf.Max(
+            0f, immunityDuration
+        );
     }
 
-    // AUMENTAR VIDAS
+    // ------------------------------------------------
+    // AUMENTAR VIDAS Y ESCUDOS
+    // ------------------------------------------------
+
     public void AddHearts(int amount)
     {
         if (isGameOver || amount <= 0)
@@ -102,6 +131,7 @@ public class PlayerVitals : MonoBehaviour
         currentHearts += amount;
 
         OnHeartsChanged?.Invoke(currentHearts, maxHearts);
+
         Debug.Log("Corazones aumentados: " + maxHearts);
     }
 
@@ -119,11 +149,17 @@ public class PlayerVitals : MonoBehaviour
         if (isGameOver || amount <= 0)
             return;
 
-        currentHearts = Mathf.Min(maxHearts, currentHearts + amount);
+        currentHearts = Mathf.Min(
+            maxHearts, currentHearts + amount
+        );
+
         OnHeartsChanged?.Invoke(currentHearts, maxHearts);
     }
 
+    // ------------------------------------------------
     // DERROTA
+    // ------------------------------------------------
+
     public void ForceGameOver()
     {
         TriggerGameOver();
@@ -138,6 +174,12 @@ public class PlayerVitals : MonoBehaviour
 
         Debug.Log("GAME OVER: el jugador perdió.");
 
+        // Música de derrota antes de cambiar el estado.
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayGameOverMusic();
+        }
+
         OnGameOver?.Invoke();
 
         if (GameManager.Instance != null)
@@ -146,7 +188,9 @@ public class PlayerVitals : MonoBehaviour
         }
         else
         {
-            Debug.LogError("PlayerVitals: no se encontró GameManager.");
+            Debug.LogError(
+                "PlayerVitals: no se encontró GameManager."
+            );
         }
     }
 }

@@ -12,6 +12,15 @@ public class PlayerController2D : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
 
+    [Header("SONIDOS")]
+    [Tooltip("Tiempo entre cada sonido de pasos.")]
+    [SerializeField, Min(0.05f)]
+    private float footstepInterval = 0.7f;
+
+    [Tooltip("Movimiento minimo necesario para reproducir pasos.")]
+    [SerializeField, Min(0f)]
+    private float movementSoundThreshold = 0.1f;
+
     private Rigidbody2D rb;
 
     private float horizontalInput;
@@ -29,6 +38,8 @@ public class PlayerController2D : MonoBehaviour
 
     private int jumpsRemaining;
 
+    private float footstepTimer;
+
     public event Action<bool> OnGroundedChanged;
     public event Action OnJumped;
 
@@ -42,7 +53,11 @@ public class PlayerController2D : MonoBehaviour
 
         if (stats == null)
         {
-            Debug.LogError("PlayerController2D: falta asignar PlayerStats.", this);
+            Debug.LogError(
+                "PlayerController2D: falta asignar PlayerStats.",
+                this
+            );
+
             enabled = false;
             return;
         }
@@ -62,16 +77,31 @@ public class PlayerController2D : MonoBehaviour
 
     private void Update()
     {
+        // No leer controles durante la pausa.
+        if (Time.timeScale <= 0f)
+            return;
+
         ReadMovementInput();
         ReadJumpInput();
     }
 
     private void FixedUpdate()
     {
+        if (Time.timeScale <= 0f)
+            return;
+
         CheckGround();
+
+        // Los pasos se comprueban después de actualizar el suelo.
+        HandleFootsteps();
+
         MovePlayer();
         HandleJump();
     }
+
+    // ------------------------------------------------
+    // ENTRADAS
+    // ------------------------------------------------
 
     private void ReadMovementInput()
     {
@@ -86,8 +116,20 @@ public class PlayerController2D : MonoBehaviour
     private void ReadJumpInput()
     {
         if (Input.GetKeyDown(KeyCode.Space))
+        {
             jumpRequested = true;
+
+            // El sonido se reproduce inmediatamente al presionar SPACE.
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayJumpSound();
+            }
+        }
     }
+
+    // ------------------------------------------------
+    // DETECCION DEL SUELO
+    // ------------------------------------------------
 
     private void CheckGround()
     {
@@ -105,7 +147,8 @@ public class PlayerController2D : MonoBehaviour
             groundLayer
         );
 
-        isGrounded = touchingGround && rb.linearVelocity.y <= 0.01f;
+        isGrounded =
+            touchingGround && rb.linearVelocity.y <= 0.01f;
 
         if (isGrounded)
             jumpsRemaining = currentMaxJumps;
@@ -114,17 +157,21 @@ public class PlayerController2D : MonoBehaviour
             OnGroundedChanged?.Invoke(isGrounded);
     }
 
+    // ------------------------------------------------
+    // MOVIMIENTO
+    // ------------------------------------------------
+
     private void MovePlayer()
     {
         float targetSpeed = horizontalInput * currentMaxSpeed;
 
-        // Aceleracion instantanea.
-        if (horizontalInput != 0f && currentAccelerationTime <= 0f)
+        if (horizontalInput != 0f &&
+            currentAccelerationTime <= 0f)
         {
             currentHorizontalSpeed = targetSpeed;
         }
-        // Frenado instantaneo al soltar el movimiento.
-        else if (horizontalInput == 0f && currentDecelerationTime <= 0f)
+        else if (horizontalInput == 0f &&
+                 currentDecelerationTime <= 0f)
         {
             currentHorizontalSpeed = 0f;
         }
@@ -135,9 +182,8 @@ public class PlayerController2D : MonoBehaviour
                 horizontalInput != 0f &&
                 Mathf.Sign(currentHorizontalSpeed) != horizontalInput;
 
-            // Si se cambia de direccion y el frenado es instantaneo,
-            // primero se detiene y luego comienza a acelerar al otro lado.
-            if (changingDirection && currentDecelerationTime <= 0f)
+            if (changingDirection &&
+                currentDecelerationTime <= 0f)
             {
                 currentHorizontalSpeed = 0f;
             }
@@ -150,7 +196,8 @@ public class PlayerController2D : MonoBehaviour
 
                 selectedTime = Mathf.Max(0.0001f, selectedTime);
 
-                float selectedRate = currentMaxSpeed / selectedTime;
+                float selectedRate =
+                    currentMaxSpeed / selectedTime;
 
                 currentHorizontalSpeed = Mathf.MoveTowards(
                     currentHorizontalSpeed,
@@ -166,6 +213,10 @@ public class PlayerController2D : MonoBehaviour
         );
     }
 
+    // ------------------------------------------------
+    // SALTO
+    // ------------------------------------------------
+
     private void HandleJump()
     {
         if (!jumpRequested)
@@ -178,7 +229,10 @@ public class PlayerController2D : MonoBehaviour
 
         jumpsRemaining--;
 
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        rb.linearVelocity = new Vector2(
+            rb.linearVelocity.x,
+            0f
+        );
 
         rb.AddForce(
             Vector2.up * currentJumpForce,
@@ -186,8 +240,39 @@ public class PlayerController2D : MonoBehaviour
         );
 
         isGrounded = false;
+
         OnGroundedChanged?.Invoke(false);
         OnJumped?.Invoke();
+    }
+
+    // ------------------------------------------------
+    // PASOS
+    // ------------------------------------------------
+
+    private void HandleFootsteps()
+    {
+        bool isMoving =
+            Mathf.Abs(horizontalInput) > movementSoundThreshold;
+
+        // No hay pasos si está en el aire o no se mueve.
+        if (!isGrounded || !isMoving)
+        {
+            footstepTimer = 0f;
+            return;
+        }
+
+        footstepTimer -= Time.fixedDeltaTime;
+
+        if (footstepTimer <= 0f)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayFootstepSound();
+            }
+
+            // Próximo paso dentro de 0,7 segundos.
+            footstepTimer = footstepInterval;
+        }
     }
 
     // ------------------------------------------------
@@ -239,6 +324,7 @@ public class PlayerController2D : MonoBehaviour
             return;
 
         Gizmos.color = Color.green;
+
         Gizmos.DrawWireSphere(
             groundCheck.position,
             stats.groundCheckRadius

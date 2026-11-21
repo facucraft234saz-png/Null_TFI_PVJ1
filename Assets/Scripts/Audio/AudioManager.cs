@@ -1,26 +1,62 @@
+
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Mixer y Fuentes")]
-    [SerializeField] private AudioMixer mainMixer;
-    [SerializeField] private AudioSource bgmSource;
+    [Header("AUDIO SOURCES")]
+    [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource sfxSource;
 
-    [Header("Musica por Pantalla / Estado")]
-    [SerializeField] private AudioClip menuMusic;
-    [SerializeField] private AudioClip gameplayMusic;
-    [SerializeField] private AudioClip shopMusic;
+    [Tooltip("AudioSource exclusivo para el sonido en loop de la puerta.")]
+    [SerializeField] private AudioSource proximityLoopSource;
+
+    [Header("MUSICA DEL MENU")]
+    [SerializeField] private AudioClip mainMenuMusic;
+
+    [Header("MUSICA DE LAS TIENDAS")]
+    [SerializeField] private AudioClip normalShopMusic;
+    [SerializeField] private AudioClip enemyShopMusic;
+    [SerializeField] private AudioClip curseShopMusic;
+
+    [Header("MUSICA GAMEPLAY - NIVELES 1 A 9")]
+    [SerializeField] private AudioClip[] earlyLevelMusic;
+
+    [Header("MUSICA GAMEPLAY - NIVEL 10 EN ADELANTE")]
+    [SerializeField] private AudioClip[] advancedLevelMusic;
+
+    [Header("CONFIGURACION GAMEPLAY")]
+    [Min(1)]
+    [SerializeField] private int advancedMusicStartingLevel = 10;
+
+    [Header("MUSICA DE PAUSA Y GAME OVER")]
+    [SerializeField] private AudioClip pauseMusic;
     [SerializeField] private AudioClip gameOverMusic;
 
-    [Header("Efectos de Sonido (SFX)")]
-    [SerializeField] private AudioClip buttonClickSFX;
-    [SerializeField] private AudioClip jumpSFX;
-    [SerializeField] private AudioClip collectGiftSFX;
+    [Header("SONIDOS DE INTERFAZ")]
+    [SerializeField] private AudioClip buttonClickSound;
+
+    [Header("SONIDOS DEL JUGADOR")]
+    [SerializeField] private AudioClip playerDamageSound;
+    [SerializeField] private AudioClip blackGiftSound;
+    [SerializeField] private AudioClip goldenGiftSound;
+    [SerializeField] private AudioClip footstepSound;
+    [SerializeField] private AudioClip jumpSound;
+
+    [Header("SONIDOS DE LA PUERTA")]
+    [SerializeField] private AudioClip exitDoorSound;
+    [SerializeField] private AudioClip exitPromptLoopSound;
+    [SerializeField] private AudioClip goldenGiftsAppearSound;
+
+    private const string MUSIC_VOLUME_KEY = "MusicVolume";
+
+    public float MusicVolume { get; private set; } = 1f;
+
+    private AudioClip lastGameplayClip;
+    private AudioClip currentGameplayClip;
 
     private void Awake()
     {
@@ -32,146 +68,320 @@ public class AudioManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-    }
 
-    private void OnEnable()
-    {
+        MusicVolume = PlayerPrefs.GetFloat(
+            MUSIC_VOLUME_KEY, 1f
+        );
+
+        if (musicSource != null)
+            musicSource.volume = MusicVolume;
+
+        if (proximityLoopSource != null)
+        {
+            proximityLoopSource.playOnAwake = false;
+            proximityLoopSource.loop = true;
+        }
+
         SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void Start()
     {
-        LoadSavedVolumes();
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
-            HandleGameStateChanged(GameManager.Instance.CurrentState);
-        }
-        else
-        {
-            PlayBGM(menuMusic);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
-        }
-
-        if (Instance == this)
-        {
-            Instance = null;
-        }
+        PlayMusicForScene(
+            SceneManager.GetActiveScene().name
+        );
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "Tienda")
-        {
-            PlayShopMusic();
-        }
-        else if (scene.name == "MainMenu")
-        {
-            PlayBGM(menuMusic);
-        }
+        StopExitPromptLoop();
+        PlayMusicForScene(scene.name);
     }
 
-    private void HandleGameStateChanged(GameState newState)
+    // ------------------------------------------------
+    // MUSICA SEGUN LA ESCENA
+    // ------------------------------------------------
+
+    private void PlayMusicForScene(string sceneName)
     {
-        switch (newState)
+        switch (sceneName)
         {
-            case GameState.Start:
-                PlayBGM(menuMusic);
+            case "MainMenu":
+                PlayMusic(mainMenuMusic);
                 break;
-            case GameState.Playing:
-                if (bgmSource != null) bgmSource.UnPause();
-                PlayBGM(gameplayMusic);
+
+            case "SampleScene":
+                PlayRandomGameplayMusic();
                 break;
-            case GameState.Paused:
-                if (bgmSource != null) bgmSource.Pause();
+
+            case "Tienda":
+                PlayMusic(normalShopMusic);
                 break;
-            case GameState.GameOver:
-                PlayBGM(gameOverMusic, false);
+
+            case "TiendaEnemigos":
+                PlayMusic(enemyShopMusic);
+                break;
+
+            case "TiendaMaldiciones":
+            case "SceneMaldiciones":
+                PlayMusic(curseShopMusic);
+                break;
+
+            default:
+                StopMusic();
                 break;
         }
     }
 
     // ------------------------------------------------
-    // REPRODUCCION DE MUSICA Y SFX
+    // MUSICA ALEATORIA DEL GAMEPLAY
     // ------------------------------------------------
 
-    public void PlayBGM(AudioClip clip, bool loop = true)
+    private void PlayRandomGameplayMusic()
     {
-        if (bgmSource == null || clip == null)
-            return;
+        int currentLevel = 1;
 
-        if (bgmSource.clip == clip && bgmSource.isPlaying)
-            return;
+        if (PlayerScenePersistence2D.Instance != null)
+        {
+            currentLevel =
+                PlayerScenePersistence2D.Instance.CurrentLevel;
+        }
 
-        bgmSource.clip = clip;
-        bgmSource.loop = loop;
-        bgmSource.Play();
+        AudioClip[] selectedCollection;
+
+        if (currentLevel >= advancedMusicStartingLevel)
+        {
+            selectedCollection = advancedLevelMusic;
+
+            Debug.Log(
+                "Gameplay: música avanzada. Nivel " +
+                currentLevel
+            );
+        }
+        else
+        {
+            selectedCollection = earlyLevelMusic;
+
+            Debug.Log(
+                "Gameplay: música inicial. Nivel " +
+                currentLevel
+            );
+        }
+
+        AudioClip selectedClip =
+            GetRandomMusic(selectedCollection);
+
+        if (selectedClip == null)
+        {
+            Debug.LogWarning(
+                "No hay músicas asignadas para el nivel " +
+                currentLevel
+            );
+
+            StopMusic();
+            return;
+        }
+
+        currentGameplayClip = selectedClip;
+        lastGameplayClip = selectedClip;
+
+        PlayMusic(selectedClip);
     }
 
-    public void PlayShopMusic() => PlayBGM(shopMusic);
-    public void PlayMenuMusic() => PlayBGM(menuMusic);
-    public void PlayGameplayMusic() => PlayBGM(gameplayMusic);
-
-    public void PlaySFX(AudioClip clip)
+    private AudioClip GetRandomMusic(AudioClip[] collection)
     {
-        if (sfxSource == null || clip == null)
+        if (collection == null || collection.Length == 0)
+            return null;
+
+        List<AudioClip> validClips =
+            new List<AudioClip>();
+
+        foreach (AudioClip clip in collection)
+        {
+            if (clip != null)
+                validClips.Add(clip);
+        }
+
+        if (validClips.Count == 0)
+            return null;
+
+        if (validClips.Count > 1)
+            validClips.Remove(lastGameplayClip);
+
+        int randomIndex = Random.Range(
+            0, validClips.Count
+        );
+
+        return validClips[randomIndex];
+    }
+
+    // ------------------------------------------------
+    // PAUSA Y GAME OVER
+    // ------------------------------------------------
+
+    public void PlayPauseMusic()
+    {
+        if (pauseMusic != null)
+            PlayMusic(pauseMusic);
+    }
+
+    public void ResumeGameplayMusic()
+    {
+        if (currentGameplayClip != null)
+        {
+            PlayMusic(currentGameplayClip);
+        }
+        else
+        {
+            PlayRandomGameplayMusic();
+        }
+    }
+
+    public void PlayGameOverMusic()
+    {
+        if (gameOverMusic != null)
+            PlayMusic(gameOverMusic);
+    }
+
+    // ------------------------------------------------
+    // REPRODUCIR MUSICA
+    // ------------------------------------------------
+
+    public void PlayMusic(AudioClip clip)
+    {
+        if (clip == null || musicSource == null)
+            return;
+
+        if (musicSource.clip == clip &&
+            musicSource.isPlaying)
+        {
+            return;
+        }
+
+        musicSource.clip = clip;
+        musicSource.loop = true;
+        musicSource.volume = MusicVolume;
+        musicSource.Play();
+
+        Debug.Log("Reproduciendo música: " + clip.name);
+    }
+
+    public void StopMusic()
+    {
+        if (musicSource != null)
+            musicSource.Stop();
+    }
+
+    // ------------------------------------------------
+    // VOLUMEN GLOBAL
+    // ------------------------------------------------
+
+    public void SetMusicVolume(float volume)
+    {
+        MusicVolume = Mathf.Clamp01(volume);
+
+        if (musicSource != null)
+            musicSource.volume = MusicVolume;
+
+        PlayerPrefs.SetFloat(
+            MUSIC_VOLUME_KEY, MusicVolume
+        );
+
+        PlayerPrefs.Save();
+    }
+
+    // ------------------------------------------------
+    // EFECTOS DE SONIDO
+    // ------------------------------------------------
+
+    public void PlayButtonSound()
+    {
+        PlaySFX(buttonClickSound);
+    }
+
+    public void PlayPlayerDamageSound()
+    {
+        PlaySFX(playerDamageSound);
+    }
+
+    public void PlayBlackGiftSound()
+    {
+        PlaySFX(blackGiftSound);
+    }
+
+    public void PlayGoldenGiftSound()
+    {
+        PlaySFX(goldenGiftSound);
+    }
+
+    public void PlayFootstepSound()
+    {
+        PlaySFX(footstepSound);
+    }
+
+    public void PlayJumpSound()
+    {
+        PlaySFX(jumpSound);
+    }
+
+    public void PlayExitDoorSound()
+    {
+        PlaySFX(exitDoorSound);
+    }
+
+    public void PlayGoldenGiftsAppearSound()
+    {
+        PlaySFX(goldenGiftsAppearSound);
+    }
+
+    private void PlaySFX(AudioClip clip)
+    {
+        if (clip == null || sfxSource == null)
             return;
 
         sfxSource.PlayOneShot(clip);
     }
 
-    public void PlayButtonClick() => PlaySFX(buttonClickSFX);
-    public void PlayJump() => PlaySFX(jumpSFX);
-    public void PlayCollectGift() => PlaySFX(collectGiftSFX);
-
     // ------------------------------------------------
-    // CONTROL DE VOLUMEN (SLIDERS 0.0001 a 1.0)
+    // LOOP DEL AVISO DE LA PUERTA
     // ------------------------------------------------
 
-    public void SetMasterVolume(float sliderValue)
+    public void StartExitPromptLoop()
     {
-        SetMixerVolume("MasterVolume", sliderValue);
-        PlayerPrefs.SetFloat("MasterVolume", sliderValue);
-    }
-
-    public void SetBGMVolume(float sliderValue)
-    {
-        SetMixerVolume("BGMVolume", sliderValue);
-        PlayerPrefs.SetFloat("BGMVolume", sliderValue);
-    }
-
-    public void SetSFXVolume(float sliderValue)
-    {
-        SetMixerVolume("SFXVolume", sliderValue);
-        PlayerPrefs.SetFloat("SFXVolume", sliderValue);
-    }
-
-    private void SetMixerVolume(string parameterName, float sliderValue)
-    {
-        if (mainMixer == null)
+        if (proximityLoopSource == null ||
+            exitPromptLoopSound == null)
+        {
             return;
+        }
 
-        float clampedValue = Mathf.Clamp(sliderValue, 0.0001f, 1f);
-        mainMixer.SetFloat(parameterName, Mathf.Log10(clampedValue) * 20f);
+        if (proximityLoopSource.isPlaying &&
+            proximityLoopSource.clip == exitPromptLoopSound)
+        {
+            return;
+        }
+
+        proximityLoopSource.Stop();
+        proximityLoopSource.clip = exitPromptLoopSound;
+        proximityLoopSource.loop = true;
+        proximityLoopSource.Play();
     }
 
-    private void LoadSavedVolumes()
+    public void StopExitPromptLoop()
     {
-        SetMasterVolume(PlayerPrefs.GetFloat("MasterVolume", 0.8f));
-        SetBGMVolume(PlayerPrefs.GetFloat("BGMVolume", 0.8f));
-        SetSFXVolume(PlayerPrefs.GetFloat("SFXVolume", 0.8f));
+        if (proximityLoopSource != null)
+            proximityLoopSource.Stop();
+    }
+
+    // ------------------------------------------------
+    // DESTRUCCION
+    // ------------------------------------------------
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            Instance = null;
+        }
     }
 }

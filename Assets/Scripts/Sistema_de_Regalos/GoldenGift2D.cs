@@ -32,7 +32,13 @@ public class GoldenGift2D : MonoBehaviour
 
         if (GiftProgressManager2D.Instance != null)
         {
-            GiftProgressManager2D.Instance.RegisterGoldenGiftCollected();
+            GiftProgressManager2D.Instance
+                .RegisterGoldenGiftCollected();
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayGoldenGiftSound();
         }
 
         Destroy(gameObject);

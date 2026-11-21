@@ -12,6 +12,7 @@ public class ExitDoorPrompt2D : MonoBehaviour
     [SerializeField] private KeyCode interactionKey = KeyCode.E;
 
     private bool playerInside;
+    private bool previousUnlockedState;
 
     private void Start()
     {
@@ -20,6 +21,12 @@ public class ExitDoorPrompt2D : MonoBehaviour
 
         if (exitDoor == null)
             exitDoor = GetComponentInParent<ExitDoor2D>();
+
+        if (exitDoor != null)
+            previousUnlockedState = exitDoor.IsUnlocked;
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.StopExitPromptLoop();
     }
 
     private void Update()
@@ -27,11 +34,20 @@ public class ExitDoorPrompt2D : MonoBehaviour
         if (!playerInside || exitDoor == null)
             return;
 
-        if (!exitDoor.IsUnlocked)
-            return;
-
-        if (Input.GetKeyDown(interactionKey))
+        // Actualizamos el aviso cuando cambia el estado
+        // de la puerta, por ejemplo al desbloquearse.
+        if (previousUnlockedState != exitDoor.IsUnlocked)
         {
+            previousUnlockedState = exitDoor.IsUnlocked;
+            UpdatePrompt();
+        }
+
+        if (exitDoor.IsUnlocked &&
+            Input.GetKeyDown(interactionKey))
+        {
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.StopExitPromptLoop();
+
             exitDoor.EnterDoor();
         }
     }
@@ -42,6 +58,9 @@ public class ExitDoorPrompt2D : MonoBehaviour
             return;
 
         playerInside = true;
+
+        if (exitDoor != null)
+            previousUnlockedState = exitDoor.IsUnlocked;
 
         UpdatePrompt();
     }
@@ -55,6 +74,9 @@ public class ExitDoorPrompt2D : MonoBehaviour
 
         if (promptText != null)
             promptText.gameObject.SetActive(false);
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.StopExitPromptLoop();
     }
 
     private void UpdatePrompt()
@@ -67,15 +89,27 @@ public class ExitDoorPrompt2D : MonoBehaviour
         if (exitDoor.IsUnlocked)
         {
             promptText.text = "PRESIONA E PARA CONTINUAR";
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.StartExitPromptLoop();
         }
         else
         {
             promptText.text = "PUERTA BLOQUEADA";
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.StopExitPromptLoop();
         }
     }
 
     private bool IsPlayer(Collider2D other)
     {
         return other.GetComponentInParent<PlayerGold>() != null;
+    }
+
+    private void OnDisable()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.StopExitPromptLoop();
     }
 }
