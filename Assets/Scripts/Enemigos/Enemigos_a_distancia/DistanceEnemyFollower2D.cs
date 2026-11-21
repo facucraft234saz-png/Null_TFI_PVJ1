@@ -6,6 +6,17 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class DistanceEnemyFollower2D : MonoBehaviour
 {
+    [Header("Referencias de animación")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+
+    [Header("Animación Cooldown")]
+    [SerializeField] private Sprite[] cooldownSprites;
+    [SerializeField, Min(0.01f)] private float cooldownFrameInterval = 0.2f;
+
+    [Header("Animación Attack")]
+    [SerializeField] private Sprite[] attackSprites;
+    [SerializeField, Min(0.01f)] private float attackFrameInterval = 0.1f;
+
     private Rigidbody2D rb;
 
     private Transform target;
@@ -34,6 +45,20 @@ public class DistanceEnemyFollower2D : MonoBehaviour
 
     private Coroutine shootingCoroutine;
 
+    // Control de animación.
+    private enum EnemyAnimation
+    {
+        None,
+        Cooldown,
+        Attack
+    }
+
+    private EnemyAnimation currentAnimation = EnemyAnimation.None;
+
+    private float animationTimer;
+    private int currentFrame;
+    private Sprite currentDisplayedSprite;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -41,6 +66,9 @@ public class DistanceEnemyFollower2D : MonoBehaviour
         rb.gravityScale = 0f;
         rb.bodyType = RigidbodyType2D.Kinematic;
         rb.freezeRotation = true;
+
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>(true);
 
         enemyColliders =
             GetComponentsInChildren<Collider2D>();
@@ -98,7 +126,6 @@ public class DistanceEnemyFollower2D : MonoBehaviour
 
         gameObject.name = definition.enemyName;
 
-        // Puede comenzar a disparar inmediatamente al entrar en rango.
         nextAttackTime = Time.time;
 
         configured = true;
@@ -122,8 +149,31 @@ public class DistanceEnemyFollower2D : MonoBehaviour
 
     private void Update()
     {
-        if (!configured ||
-            target == null ||
+        if (!configured)
+            return;
+
+        UpdateFacing();
+
+        // Atacando utiliza sus sprites de Attack.
+        // Cuando no dispara utiliza los sprites de Cooldown.
+        if (isShooting)
+        {
+            Animate(
+                attackSprites,
+                attackFrameInterval,
+                EnemyAnimation.Attack
+            );
+        }
+        else
+        {
+            Animate(
+                cooldownSprites,
+                cooldownFrameInterval,
+                EnemyAnimation.Cooldown
+            );
+        }
+
+        if (target == null ||
             targetVitals == null ||
             targetVitals.IsGameOver)
         {
@@ -139,6 +189,10 @@ public class DistanceEnemyFollower2D : MonoBehaviour
             TryShoot();
     }
 
+    // --------------------------------------------------
+    // MOVIMIENTO
+    // --------------------------------------------------
+
     private void FollowPlayer()
     {
         Vector2 currentPosition = rb.position;
@@ -152,6 +206,87 @@ public class DistanceEnemyFollower2D : MonoBehaviour
 
         rb.MovePosition(newPosition);
     }
+
+    // --------------------------------------------------
+    // DIRECCIÓN
+    // --------------------------------------------------
+
+    private void UpdateFacing()
+    {
+        if (spriteRenderer == null || target == null)
+            return;
+
+        spriteRenderer.flipX =
+            target.position.x < transform.position.x;
+    }
+
+    // --------------------------------------------------
+    // ANIMACIONES
+    // --------------------------------------------------
+
+    private void Animate(
+        Sprite[] sprites,
+        float frameInterval,
+        EnemyAnimation animation)
+    {
+        if (spriteRenderer == null ||
+            sprites == null ||
+            sprites.Length == 0)
+            return;
+
+        // Reiniciamos los frames cuando cambia de animación.
+        if (currentAnimation != animation)
+        {
+            currentAnimation = animation;
+            currentFrame = 0;
+            animationTimer = 0f;
+
+            ApplyAnimationSprite(sprites);
+            return;
+        }
+
+        animationTimer += Time.deltaTime;
+
+        float interval = Mathf.Max(0.01f, frameInterval);
+
+        while (animationTimer >= interval)
+        {
+            animationTimer -= interval;
+
+            currentFrame++;
+
+            if (currentFrame >= sprites.Length)
+                currentFrame = 0;
+
+            ApplyAnimationSprite(sprites);
+        }
+    }
+
+    private void ApplyAnimationSprite(Sprite[] sprites)
+    {
+        if (sprites == null ||
+            sprites.Length == 0 ||
+            spriteRenderer == null)
+            return;
+
+        currentFrame = Mathf.Clamp(
+            currentFrame,
+            0,
+            sprites.Length - 1
+        );
+
+        Sprite newSprite = sprites[currentFrame];
+
+        if (newSprite == null || newSprite == currentDisplayedSprite)
+            return;
+
+        spriteRenderer.sprite = newSprite;
+        currentDisplayedSprite = newSprite;
+    }
+
+    // --------------------------------------------------
+    // DISPAROS
+    // --------------------------------------------------
 
     private void TryShoot()
     {
@@ -182,17 +317,14 @@ public class DistanceEnemyFollower2D : MonoBehaviour
                 break;
             }
 
-            // Dispara un proyectil.
             ShootSingleProjectile(i, count);
 
-            // Espera solamente si quedan proyectiles por disparar.
             if (i < count - 1 && projectileInterval > 0f)
             {
                 yield return new WaitForSeconds(projectileInterval);
             }
         }
 
-        // El cooldown comienza cuando termina toda la rafaga.
         nextAttackTime = Time.time + attackCooldown;
 
         isShooting = false;
@@ -212,7 +344,6 @@ public class DistanceEnemyFollower2D : MonoBehaviour
         Vector2 direction =
             ((Vector2)target.position - rb.position).normalized;
 
-        // Separacion angular entre proyectiles.
         float angleSpacing = 12f;
 
         float totalAngle =
@@ -279,6 +410,10 @@ public class DistanceEnemyFollower2D : MonoBehaviour
             direction.x * sine + direction.y * cosine
         ).normalized;
     }
+
+    // --------------------------------------------------
+    // LIMPIEZA
+    // --------------------------------------------------
 
     private void OnDisable()
     {

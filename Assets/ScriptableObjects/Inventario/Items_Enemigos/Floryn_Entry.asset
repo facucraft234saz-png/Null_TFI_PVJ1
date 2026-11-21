@@ -13,15 +13,18 @@ MonoBehaviour:
   m_Name: Floryn_Entry
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
   entryName: Floryn
-  description: "a criatura flotante que persigue lentamente al jugador y le quita
-    un coraz\xF3n al tocarlo."
+  description: "Una peque\xF1a gota de agua rosa que avanza sin prisa y con una sonrisa
+    despreocupada, coronada por una bonita flor sobre la cabeza. Su aspecto dulce
+    y su paso lento invitan a subestimarla, pero su cuerpo guarda un efecto peligroso:
+    rozarla basta para recibir da\xF1o. Es el recordatorio perfecto de que en este
+    mundo no todo lo bonito es inofensivo."
   category: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 74b6c95965d42cd4e99cb1817f8bb512, type: 3}
   placeholderColor: {r: 1, g: 0.6650944, b: 0.93138075, a: 1}
   upgradeEffects: []
   upgradeType: 0
   upgradeValue: 0
-  maxStack: 20
+  maxStack: 15
   enemyDefinition: {fileID: 11400000, guid: aa368384e7a8a114dbe8ac5c86433aba, type: 2}
   affectedEnemies: []
   enemyModifiers: []

@@ -17,8 +17,8 @@ MonoBehaviour:
     y aumentan tu velocidad de movimiento en un +10%, ideal para esquivar peligros
     y moverte con mayor agilidad."
   category: 0
-  icon: {fileID: 0}
-  placeholderColor: {r: 0.4481132, g: 0.79621184, b: 1, a: 1}
+  icon: {fileID: 21300000, guid: 04386fdb9d851c44a968d3c685084fac, type: 3}
+  placeholderColor: {r: 0.4481132, g: 0.79621184, b: 1, a: 0}
   upgradeEffects:
   - upgradeType: 3
     upgradeValue: 0.1

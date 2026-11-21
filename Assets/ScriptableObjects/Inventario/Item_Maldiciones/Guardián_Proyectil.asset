@@ -12,19 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
   m_Name: "Guardi\xE1n_Proyectil"
   m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
-  entryName: Dobble Proyectil
-  description: dispara mas probyectil
+  entryName: Eco Doble
+  description: "Una maldici\xF3n que hace que el Guardi\xE1n sume 1 proyectil extra
+    a cada descarga. "
   category: 2
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 318668d8c63cf7746a6ce21c6f7d40a5, type: 3}
   placeholderColor: {r: 0.9528302, g: 0.9528302, b: 0, a: 1}
+  upgradeEffects: []
   upgradeType: 0
   upgradeValue: 1
-  maxStack: 1
+  maxStack: 5
   enemyDefinition: {fileID: 0}
   affectedEnemies:
   - {fileID: 11400000, guid: 3289b917c226ee844b991a991674fcd0, type: 2}
   enemyModifiers:
-  - stat: 8
+  - stat: 11
     mode: 1
-    value: -0.5
+    value: 1
   additionalEnemies: []

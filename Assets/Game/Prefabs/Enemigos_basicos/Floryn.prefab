@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 0.3915094, b: 0.8370779, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,7 +92,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!50 &8069974822570132528
 Rigidbody2D:
@@ -169,3 +169,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf39eb66b7796c442b8ce8e3eac1f032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BasicEnemyFollower2D
+  spriteRenderer: {fileID: 0}
+  idleSprites:
+  - {fileID: 21300000, guid: 74b6c95965d42cd4e99cb1817f8bb512, type: 3}
+  - {fileID: 21300000, guid: fb7cb33cba6e1ab4ba9797758d1386c6, type: 3}
+  - {fileID: 21300000, guid: 388febe1f99b50d47b9c517261d58bb7, type: 3}
+  - {fileID: 21300000, guid: 90b171f153ff27a46be536d94017de19, type: 3}
+  - {fileID: 21300000, guid: 51def6c29b123b142a99f9ea3e649607, type: 3}
+  - {fileID: 21300000, guid: ab1bcf71a8dd5ae4498a37c4f0ad1ffe, type: 3}
+  - {fileID: 21300000, guid: 65597d80c0e7a864faafb6b30f805030, type: 3}
+  - {fileID: 21300000, guid: f200ee01d98af9a429b7820df630d6a1, type: 3}
+  - {fileID: 21300000, guid: ad74616e575f10c45a856a22fb853491, type: 3}
+  - {fileID: 21300000, guid: 922434cedb73f9e458ae0d2fe373703e, type: 3}
+  - {fileID: 21300000, guid: 53193bb2a180ddf41ac16edd4f9853a5, type: 3}
+  - {fileID: 21300000, guid: b446f4a1979c29a448e6c8e08ffd42e1, type: 3}
+  - {fileID: 21300000, guid: f2d1bafae91d46c49989638cc8a0921e, type: 3}
+  - {fileID: 21300000, guid: ce820d32a0668d34e89914b25fd54524, type: 3}
+  - {fileID: 21300000, guid: 8f629faa033772242b97b27213eac381, type: 3}
+  - {fileID: 21300000, guid: c6a2ad3f36c35354aa6ef67ccc86dbb4, type: 3}
+  - {fileID: 21300000, guid: 70bbc151c4a8e9b459cadbb6537f841b, type: 3}
+  - {fileID: 21300000, guid: 112746a0c0d3ea4489c290a055321a5f, type: 3}
+  - {fileID: 21300000, guid: 5b67c31ffeff5ac42b98274de4d3030d, type: 3}
+  idleFrameInterval: 0.2

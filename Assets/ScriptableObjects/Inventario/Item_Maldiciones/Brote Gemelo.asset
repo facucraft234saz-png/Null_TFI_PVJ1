@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60f89e06aaee11b4c81ae67cb7df297d, type: 3}
+  m_Name: Brote Gemelo
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryEntryData
+  entryName: Brote Gemelo
+  description: "Hace que Floryn se divida y multiplique, sumando 2 Floryn m\xE1s
+    a la escena. Donde antes hab\xEDa una sola gota tranquila y feliz con su flor
+    en la cabeza, ahora aparecen dos copias adicionales que comparten su misma dulzura
+    enga\xF1osa y su peligro al contacto, llenando el espacio de m\xE1s presencia
+    y m\xE1s cuidado al avanzar."
+  category: 2
+  icon: {fileID: 21300000, guid: 3dac9d5c57cf17c4686056854a2e470a, type: 3}
+  placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+  upgradeEffects: []
+  upgradeType: 0
+  upgradeValue: 1
+  maxStack: 2
+  enemyDefinition: {fileID: 0}
+  affectedEnemies:
+  - {fileID: 11400000, guid: aa368384e7a8a114dbe8ac5c86433aba, type: 2}
+  enemyModifiers: []
+  additionalEnemies:
+  - enemyType: 0
+    enemyDefinition: {fileID: 11400000, guid: aa368384e7a8a114dbe8ac5c86433aba, type: 2}
+    amount: 2

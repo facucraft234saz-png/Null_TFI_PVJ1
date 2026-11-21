@@ -17,8 +17,8 @@ MonoBehaviour:
     la c\xE1mara un 50% para que acompa\xF1e cada movimiento del jugador sin demoras,
     ideal para plataformas r\xE1pidas y maniobras precisas."
   category: 0
-  icon: {fileID: 0}
-  placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+  icon: {fileID: 21300000, guid: 75e2afe76b2e3d74aa782e843c78be86, type: 3}
+  placeholderColor: {r: 1, g: 1, b: 1, a: 0}
   upgradeEffects:
   - upgradeType: 10
     upgradeValue: 50
